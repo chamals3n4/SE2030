@@ -9,7 +9,7 @@ import {
     AlertTriangle
 } from "lucide-react"
 
-import { VersionSwitcher } from "@/components/version-switcher"
+import { ProjectSwitcher } from "@/components/project-switcher"
 import {
     Sidebar,
     SidebarContent,
@@ -24,9 +24,8 @@ import {
 
 // This is sample data.
 const data = {
-    versions: ["1.0.1", "1.1.0-alpha", "2.0.0-beta1"],
     navMain: [
-        { title: "Projects", url: "/projects", icon: FolderOpen },
+        { title: "Overview", url: "/projects", icon: FolderOpen },
         { title: "Workforce", url: "/workforce", icon: Users },
         { title: "Materials & Equipment", url: "/materials-equipment", icon: Package },
         { title: "Suppliers & Procurement", url: "/suppliers-procurement", icon: ShoppingCart },
@@ -41,10 +40,7 @@ export function AppSidebar({ ...props }) {
     return (
         <Sidebar {...props}>
             <SidebarHeader>
-                <VersionSwitcher
-                    versions={data.versions}
-                    defaultVersion={data.versions[0]}
-                />
+                <ProjectSwitcher />
             </SidebarHeader>
             <SidebarContent className="mt-2">
                 <SidebarGroup>
