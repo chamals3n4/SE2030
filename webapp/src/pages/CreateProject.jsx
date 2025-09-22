@@ -90,7 +90,7 @@ export default function CreateProject() {
             if (email) {
                 try {
                     const existing = await clientAPI.search(email)
-                    const matches = Array.isArray(existing.data) ? existing.data : []
+                    const matches = Array.isArray(existing) ? existing : []
                     const duplicate = matches.find(c => (c.email || "").toLowerCase() === email)
                     if (duplicate) {
                         setCreatedClient(duplicate)
@@ -112,8 +112,8 @@ export default function CreateProject() {
                 }
             }
 
-            const response = await clientAPI.create({ name, email, phone })
-            setCreatedClient(response.data)
+            const created = await clientAPI.create({ name, email, phone })
+            setCreatedClient(created)
 
             projectForm.reset({
                 name: "",

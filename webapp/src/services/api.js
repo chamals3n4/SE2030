@@ -7,25 +7,21 @@ const api = axios.create({
     },
 });
 
-
-api.interceptors.request.use(
-    (config) => {
-        return config;
-    },
-    (error) => {
-        return Promise.reject(error);
+// authorization header for API calls
+export const setAuthToken = (token) => {
+    if (token) {
+        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    } else {
+        delete api.defaults.headers.common['Authorization'];
     }
-);
+};
 
-api.interceptors.response.use(
-    (response) => {
-        return response;
+export const publicApi = axios.create({
+    baseURL: 'http://localhost:8080/api',
+    headers: {
+        'Content-Type': 'application/json',
     },
-    (error) => {
-        console.error('API Error:', error.response?.data || error.message);
-        return Promise.reject(error);
-    }
-);
+});
 
 export const projectAPI = {
     getAll: () => api.get('/projects'),
@@ -36,6 +32,10 @@ export const projectAPI = {
     getByClient: (clientId) => api.get(`/projects/by-client/${clientId}`),
     getByStatus: (status) => api.get(`/projects/status/${status}`),
     search: (query) => api.get(`/projects/search?q=${encodeURIComponent(query)}`),
+};
+
+export const publicAPI = {
+    health: () => publicApi.get('/public/health'),
 };
 
 export const clientAPI = {
@@ -118,6 +118,100 @@ export const issueAPI = {
             ...(notes && { notes })
         });
         return api.post(`/issues/${id}/close?${params}`);
+    }
+};
+
+export const materialAPI = {
+    getAll: () => api.get('/materials'),
+    getById: (id) => api.get(`/materials/${id}`),
+    create: (materialData) => api.post('/materials', materialData),
+    update: (id, materialData) => api.put(`/materials/${id}`, materialData),
+    delete: (id) => api.delete(`/materials/${id}`),
+    archive: (id) => api.put(`/materials/${id}/archive`),
+    forceDelete: (id) => api.delete(`/materials/${id}/force`),
+    getByUnit: (uom) => api.get(`/materials/by-unit/${uom}`),
+    getBySupplier: (supplierId) => api.get(`/materials/by-supplier/${supplierId}`),
+    getLowStock: () => api.get('/materials/low-stock')
+};
+
+export const equipmentAPI = {
+    getAll: () => api.get('/equipment'),
+    getById: (id) => api.get(`/equipment/${id}`),
+    create: (equipmentData) => api.post('/equipment', equipmentData),
+    update: (id, equipmentData) => api.put(`/equipment/${id}`, equipmentData),
+    delete: (id) => api.delete(`/equipment/${id}`),
+    archive: (id) => api.put(`/equipment/${id}/archive`),
+    forceDelete: (id) => api.delete(`/equipment/${id}/force`),
+    getByType: (type) => api.get(`/equipment/by-type/${type}`),
+    getBySupplier: (supplierId) => api.get(`/equipment/by-supplier/${supplierId}`)
+};
+
+export const supplierAPI = {
+    getAll: () => api.get('/suppliers'),
+    getById: (id) => api.get(`/suppliers/${id}`),
+    create: (supplierData) => api.post('/suppliers', supplierData),
+    update: (id, supplierData) => api.put(`/suppliers/${id}`, supplierData),
+    delete: (id) => api.delete(`/suppliers/${id}`),
+    search: (query) => api.get(`/suppliers/search?q=${encodeURIComponent(query)}`),
+    getByName: (name) => api.get(`/suppliers/by-name?name=${encodeURIComponent(name)}`)
+};
+
+export const inventoryAPI = {
+    receive: (resourceId, quantity, options = {}) => {
+        const params = new URLSearchParams({
+            quantity: quantity.toString(),
+            ...(options.refType && { refType: options.refType }),
+            ...(options.refId && { refId: options.refId.toString() }),
+            ...(options.notes && { notes: options.notes })
+        });
+        return api.post(`/inventory/receive/${resourceId}?${params}`);
+    },
+    
+    consume: (resourceId, quantity, options = {}) => {
+        const params = new URLSearchParams({
+            quantity: quantity.toString(),
+            ...(options.refType && { refType: options.refType }),
+            ...(options.refId && { refId: options.refId.toString() }),
+            ...(options.notes && { notes: options.notes })
+        });
+        return api.post(`/inventory/consume/${resourceId}?${params}`);
+    },
+    
+    adjust: (resourceId, quantity, notes = '') => {
+        const params = new URLSearchParams({
+            quantity: quantity.toString(),
+            ...(notes && { notes })
+        });
+        return api.post(`/inventory/adjust/${resourceId}?${params}`);
+    }
+};
+
+export const procurementOrderAPI = {
+    getAll: () => api.get('/procurement-orders'),
+    getById: (id) => api.get(`/procurement-orders/${id}`),
+    create: (orderData) => api.post('/procurement-orders', orderData),
+    createOrder: (resourceId, supplierId, quantity, options = {}) => {
+        const params = new URLSearchParams({
+            resourceId: resourceId.toString(),
+            supplierId: supplierId.toString(),
+            quantity: quantity.toString(),
+            ...(options.unitPrice && { unitPrice: options.unitPrice.toString() }),
+            ...(options.expectedDeliveryDate && { expectedDeliveryDate: options.expectedDeliveryDate }),
+            ...(options.notes && { notes: options.notes })
+        });
+        return api.post(`/procurement-orders/create-order?${params}`);
+    },
+    
+    update: (id, orderData) => api.put(`/procurement-orders/${id}`, orderData),
+    delete: (id) => api.delete(`/procurement-orders/${id}`),
+    getByResource: (resourceId) => api.get(`/procurement-orders/by-resource/${resourceId}`),
+    getBySupplier: (supplierId) => api.get(`/procurement-orders/by-supplier/${supplierId}`),
+    getByStatus: (status) => api.get(`/procurement-orders/by-status/${status}`),
+    search: (query) => api.get(`/procurement-orders/search?q=${encodeURIComponent(query)}`),
+    getByOrderDateBetween: (start, end) => api.get(`/procurement-orders/by-order-date?start=${start}&end=${end}`),
+    updateStatus: (id, status) => {
+        const params = new URLSearchParams({ status });
+        return api.put(`/procurement-orders/${id}/status?${params}`);
     }
 };
 

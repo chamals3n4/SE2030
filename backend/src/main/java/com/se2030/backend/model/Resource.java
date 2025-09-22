@@ -34,6 +34,16 @@ public abstract class Resource {
     @Column(name = "updated_date")
     private LocalDateTime updatedDate;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "preferred_supplier_id")
+    private Supplier preferredSupplier;
+
+    @Column(name = "reorder_level")
+    private Integer reorderLevel; // Minimum stock level before reordering
+
+    @Column(name = "reorder_quantity")
+    private Integer reorderQuantity; // Standard quantity to reorder
+
     public Resource() {
         this.createdDate = LocalDateTime.now();
         this.updatedDate = LocalDateTime.now();
@@ -57,6 +67,15 @@ public abstract class Resource {
 
     public LocalDateTime getUpdatedDate() { return updatedDate; }
     public void setUpdatedDate(LocalDateTime updatedDate) { this.updatedDate = updatedDate; }
+
+    public Supplier getPreferredSupplier() { return preferredSupplier; }
+    public void setPreferredSupplier(Supplier preferredSupplier) { this.preferredSupplier = preferredSupplier; this.updatedDate = LocalDateTime.now(); }
+
+    public Integer getReorderLevel() { return reorderLevel; }
+    public void setReorderLevel(Integer reorderLevel) { this.reorderLevel = reorderLevel; this.updatedDate = LocalDateTime.now(); }
+
+    public Integer getReorderQuantity() { return reorderQuantity; }
+    public void setReorderQuantity(Integer reorderQuantity) { this.reorderQuantity = reorderQuantity; this.updatedDate = LocalDateTime.now(); }
 
     @PreUpdate
     public void preUpdate() { this.updatedDate = LocalDateTime.now(); }

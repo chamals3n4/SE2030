@@ -57,6 +57,36 @@ public class MaterialController {
 	public ResponseEntity<List<Material>> byUnit(@PathVariable("uom") String uom) {
 		return new ResponseEntity<>(resourceService.materialsByUnit(uom), HttpStatus.OK);
 	}
+
+	@GetMapping("/by-supplier/{supplierId}")
+	public ResponseEntity<List<Material>> bySupplier(@PathVariable("supplierId") Long supplierId) {
+		return new ResponseEntity<>(resourceService.getMaterialsBySupplier(supplierId), HttpStatus.OK);
+	}
+
+	@GetMapping("/low-stock")
+	public ResponseEntity<List<Material>> getLowStock() {
+		return new ResponseEntity<>(resourceService.getLowStockMaterials(), HttpStatus.OK);
+	}
+
+	@PutMapping("/{id}/archive")
+	public ResponseEntity<Material> archive(@PathVariable("id") Long id) {
+		try {
+			Material archived = resourceService.archiveMaterial(id);
+			return new ResponseEntity<>(archived, HttpStatus.OK);
+		} catch (RuntimeException e) {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+	}
+
+	@DeleteMapping("/{id}/force")
+	public ResponseEntity<Void> forceDelete(@PathVariable("id") Long id) {
+		try {
+			resourceService.forceDeleteMaterial(id);
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		} catch (RuntimeException e) {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+	}
 }
 
 

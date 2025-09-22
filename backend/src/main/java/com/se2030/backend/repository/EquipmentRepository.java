@@ -9,6 +9,7 @@ import java.util.List;
 @Repository
 public interface EquipmentRepository extends JpaRepository<Equipment, Long> {
     List<Equipment> findByEquipmentType(String equipmentType);
+    List<Equipment> findByPreferredSupplier_SupplierId(Long supplierId);
 }
 
 
