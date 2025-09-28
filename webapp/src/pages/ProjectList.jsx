@@ -120,7 +120,9 @@ export default function ProjectList() {
   };
 
   const handleProjectClick = (projectId) => {
-    navigate(`/projects?projectId=${projectId}`);
+    if (!projectId) return;
+    try { window.localStorage.setItem('lastProjectId', String(projectId)); } catch { }
+    navigate(`/projects/${projectId}/overview`);
   };
 
   const handleUpdateProject = async (data) => {
@@ -136,15 +138,15 @@ export default function ProjectList() {
         client: selectedProject.client,
       };
 
-      const updated = await projectAPI.update(
+      const res = await projectAPI.update(
         selectedProject.projectId,
         projectData
       );
-      const updatedProjects = projects.map((project) =>
-        project.projectId === selectedProject.projectId
-          ? updated
-          : project
-      );
+      const updated = res?.data ?? res;
+      const updatedProjects = projects.map((project) => {
+        const pid = project.projectId ?? project.id;
+        return pid === selectedProject.projectId ? updated : project;
+      });
 
       setProjects(updatedProjects);
       setIsUpdateDialogOpen(false);
@@ -227,28 +229,7 @@ export default function ProjectList() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center">
-              <h1 className="text-lg font-semibold text-gray-900">
-                Construction Management System - SE2030
-              </h1>
-            </div>
-            <div className="flex gap-4">
-              <Button
-                className="flex items-center gap-2 text-white bg-blue-600 hover:bg-blue-700"
-                onClick={() => navigate("/create-project")}
-              >
-                <Plus className="h-4 w-4" />
-                New Project
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
-
+    <div className="min-h-screen">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
@@ -335,7 +316,7 @@ export default function ProjectList() {
                 work.
               </p>
               <Button
-                onClick={() => navigate("/create-project")}
+                onClick={() => navigate("/projects/create")}
                 className="flex items-center gap-2 text-white bg-blue-600 hover:bg-blue-700 px-6 py-3"
               >
                 <Plus className="h-4 w-4" />
@@ -348,11 +329,11 @@ export default function ProjectList() {
                 key={project.projectId || project.id}
                 className="hover:cursor-pointer transition-all duration-200 border border-gray-200 hover:border-blue-300 hover:shadow-lg bg-white rounded-xl group overflow-hidden"
               >
-                <CardContent className="p-6">
-                  <div className="flex items-start gap-4 mb-4">
-                    <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                <CardContent className="p-4">
+                  <div className="flex items-start gap-3 mb-3">
+                    <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
                       <svg
-                        className="w-6 h-6 text-blue-600"
+                        className="w-5 h-5 text-blue-600"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -368,61 +349,66 @@ export default function ProjectList() {
 
                     <div className="flex-1 min-w-0">
                       <h3
-                        className="font-semibold text-gray-900 text-lg mb-2 cursor-pointer group-hover:text-blue-600 transition-colors duration-200 line-clamp-2"
+                        className="font-semibold text-gray-900 text-base mb-1 cursor-pointer group-hover:text-blue-600 transition-colors duration-200 line-clamp-2"
                         onClick={() =>
                           handleProjectClick(project.projectId || project.id)
                         }
                       >
                         {project.name}
                       </h3>
-                      <div className="flex items-center gap-3 mb-3">
+                      <div className="flex items-center gap-2 mb-2">
                         <span
-                          className={`px-3 py-1 text-xs font-medium rounded-full ${statusColors[project.status]
+                          className={`px-2.5 py-0.5 text-[11px] font-medium rounded-full ${statusColors[project.status]
                             }`}
                         >
                           {project.status}
                         </span>
-                        <span className="text-sm text-gray-500">
+                        <span className="text-xs text-gray-500">
                           {formatDate(project.startDate)}
                         </span>
                       </div>
-                      <div className="flex items-center text-sm text-gray-600">
-                        <MapPin className="h-4 w-4 mr-2 text-gray-400" />
+                      <div className="flex items-center text-xs text-gray-600">
+                        <MapPin className="h-3.5 w-3.5 mr-1.5 text-gray-400" />
                         <span className="truncate">{project.location}</span>
                       </div>
+                      {project.budget && (
+                        <div className="mt-1 text-xs text-gray-600">
+                          Budget: <span className="font-medium">{formatCurrency(project.budget)}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
 
-                  <div className="flex gap-2 pt-4 border-t border-gray-100">
+                  <div className="flex gap-2 pt-3 border-t border-gray-100">
                     <Button
                       variant="outline"
                       size="sm"
-                      className="flex-1 text-sm h-9 border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300 font-medium bg-transparent"
-                      onClick={() => handleProjectClick(project.id)}
+                      className="flex-1 text-xs h-8 border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300 font-medium bg-transparent"
+                      onClick={() => handleProjectClick(project.projectId ?? project.id)}
                     >
                       Open Dashboard
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
-                      className="h-9 w-9 p-0 border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300 bg-transparent"
+                      className="h-8 w-8 p-0 border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300 bg-transparent"
                       onClick={(e) => {
                         e.stopPropagation();
                         openUpdateDialog(project);
                       }}
                     >
-                      <Edit className="h-4 w-4" />
+                      <Edit className="h-3.5 w-3.5" />
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
-                      className="h-9 w-9 p-0 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 bg-transparent"
+                      className="h-8 w-8 p-0 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 bg-transparent"
                       onClick={(e) => {
                         e.stopPropagation();
                         openDeleteDialog(project);
                       }}
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="h-3.5 w-3.5" />
                     </Button>
                   </div>
                 </CardContent>

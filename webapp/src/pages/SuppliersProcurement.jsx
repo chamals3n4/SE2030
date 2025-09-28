@@ -119,11 +119,20 @@ export default function SuppliersProcurement() {
         try {
             setViewingSupplier(supplier);
             const [materialsRes, equipmentRes] = await Promise.all([
-                materialAPI.getBySupplier(supplier.supplierId),
-                equipmentAPI.getBySupplier(supplier.supplierId)
+                materialAPI.getAll(),
+                equipmentAPI.getAll()
             ]);
-            setSupplierMaterials(materialsRes.data);
-            setSupplierEquipment(equipmentRes.data);
+
+            // Filter materials and equipment by supplier
+            const supplierMaterials = materialsRes.data.filter(m =>
+                m.preferredSupplier && m.preferredSupplier.supplierId == supplier.supplierId
+            );
+            const supplierEquipment = equipmentRes.data.filter(e =>
+                e.preferredSupplier && e.preferredSupplier.supplierId == supplier.supplierId
+            );
+
+            setSupplierMaterials(supplierMaterials);
+            setSupplierEquipment(supplierEquipment);
             setIsSuppliesDialogOpen(true);
         } catch (error) {
             toast.error('Failed to fetch supplier supplies');

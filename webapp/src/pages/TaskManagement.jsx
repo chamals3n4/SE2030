@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Textarea } from '../components/ui/textarea';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
 import { Progress } from '../components/ui/progress';
-import { Search, Plus, Edit, Trash2, Calendar, Flag, Users, User, CheckSquare, CheckCircle, AlertCircle, PlayCircle } from 'lucide-react';
+import { Search, Plus, Edit, Trash2, Calendar, Flag, Users, User, CheckSquare, CheckCircle, AlertCircle, PlayCircle, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 const TASK_STATUSES = ['TODO', 'IN_PROGRESS', 'DONE'];
@@ -28,6 +28,9 @@ export default function TaskManagement() {
     const [selectedStatus, setSelectedStatus] = useState('ALL');
     const [selectedPriority, setSelectedPriority] = useState('ALL');
     const [selectedProject, setSelectedProject] = useState('ALL');
+    const [boardView, setBoardView] = useState(true);
+    const [draggingTaskId, setDraggingTaskId] = useState(null);
+    const [dragOverCol, setDragOverCol] = useState(null);
 
     const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -88,7 +91,7 @@ export default function TaskManagement() {
 
     const fetchEmployees = async () => {
         try {
-            const response = await employeeAPI.getActive();
+            const response = await employeeAPI.getAll();
             setEmployees(response.data);
         } catch (error) {
             console.error('Error fetching employees:', error);
@@ -119,6 +122,33 @@ export default function TaskManagement() {
 
         setFilteredTasks(filtered);
     };
+
+    const tasksByStatus = {
+        TODO: filteredTasks.filter(t => t.status === 'TODO'),
+        IN_PROGRESS: filteredTasks.filter(t => t.status === 'IN_PROGRESS'),
+        DONE: filteredTasks.filter(t => t.status === 'DONE'),
+    };
+
+    const onDragStart = (ev, task) => {
+        ev.dataTransfer.setData('text/plain', JSON.stringify({ taskId: task.taskId }));
+        setDraggingTaskId(task.taskId);
+    };
+
+    const onDropTo = async (ev, status) => {
+        ev.preventDefault();
+        try {
+            const data = JSON.parse(ev.dataTransfer.getData('text/plain'));
+            const task = tasks.find(t => t.taskId === data.taskId);
+            if (!task || task.status === status) return;
+            await taskAPI.update(task.taskId, { ...task, status });
+            await fetchTasks();
+        } catch (e) { }
+        setDraggingTaskId(null);
+        setDragOverCol(null);
+    };
+
+    const allowDrop = (ev) => ev.preventDefault();
+    const allowDropColumn = (col) => (ev) => { ev.preventDefault(); setDragOverCol(col); };
 
     const handleCreateTask = async (e) => {
         e.preventDefault();
@@ -262,22 +292,45 @@ export default function TaskManagement() {
         ];
     };
 
-    if (loading) {
-        return (
-            <div className="p-6">
-                <div className="flex items-center justify-center h-64">
-                    <div className="text-lg">Loading tasks...</div>
-                </div>
-            </div>
-        );
-    }
-
     return (
         <div className="p-6 space-y-6">
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-start">
                 <div>
-                    <h1 className="text-3xl font-bold">Task Management</h1>
-                    <p className="text-gray-600 mt-1">Manage tasks and assign them to team members</p>
+                    <div className="flex items-center gap-3">
+                        <h1 className="text-3xl font-bold">Tasks Board</h1>
+                        {loading && (
+                            <span className="inline-flex items-center text-sm text-gray-500">
+                                <Loader2 className="h-4 w-4 mr-1 animate-spin" /> Syncing
+                            </span>
+                        )}
+                    </div>
+                    <p className="text-gray-600 mt-1">Plan and track tasks in a board view</p>
+                    <div className="mt-3 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                        <div className="relative w-full md:w-96">
+                            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                            <Input
+                                placeholder="Search tasks (title or description)"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="pl-9 shadow-none"
+                            />
+                            {searchTerm && (
+                                <button
+                                    type="button"
+                                    onClick={() => setSearchTerm('')}
+                                    className="absolute right-2 top-2.5 text-xs text-gray-500 hover:text-gray-700"
+                                >
+                                    Clear
+                                </button>
+                            )}
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2 text-sm">
+                            <span className="h-10 min-w-[140px] px-4 rounded-full bg-slate-50 text-slate-700 inline-flex items-center justify-center">Total: <span className="ml-1 font-semibold">{tasks.length}</span></span>
+                            <span className="h-10 min-w-[140px] px-4 rounded-full bg-blue-50 text-blue-700 inline-flex items-center justify-center">To Do: <span className="ml-1 font-semibold">{tasks.filter(t => t.status === 'TODO').length}</span></span>
+                            <span className="h-10 min-w-[140px] px-4 rounded-full bg-orange-50 text-orange-700 inline-flex items-center justify-center">In Progress: <span className="ml-1 font-semibold">{tasks.filter(t => t.status === 'IN_PROGRESS').length}</span></span>
+                            <span className="h-10 min-w-[140px] px-4 rounded-full bg-green-50 text-green-700 inline-flex items-center justify-center">Completed: <span className="ml-1 font-semibold">{tasks.filter(t => t.status === 'DONE').length}</span></span>
+                        </div>
+                    </div>
                 </div>
                 <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
                     <DialogTrigger asChild>
@@ -386,193 +439,68 @@ export default function TaskManagement() {
                 </Dialog>
             </div>
 
+            {/* Summary cards removed per request */}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {getStatsCards().map((stat, index) => (
-                    <Card key={index} className="shadow-none">
-                        <CardContent className="px-3 py-1">
-                            <div className="flex items-center space-x-3">
-                                <div className={`p-1.5 rounded-lg ${stat.bgColor}`}>
-                                    <stat.icon className={`h-4 w-4 ${stat.color}`} />
+            {/* Board */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-[70vh]">
+                {['TODO', 'IN_PROGRESS', 'DONE'].map((col) => (
+                    <div
+                        key={col}
+                        className={`rounded-md border p-3 bg-gray-50 flex flex-col ${dragOverCol === col ? 'border-red-400' : ''}`}
+                        onDragOver={allowDropColumn(col)}
+                        onDragLeave={() => setDragOverCol(null)}
+                        onDrop={(ev) => onDropTo(ev, col)}
+                    >
+                        <div className="flex items-center justify-between mb-2">
+                            <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">{col.replace('_', ' ')}</div>
+                            <div className="text-xs text-gray-500">{tasksByStatus[col].length}</div>
+                        </div>
+                        <div className="space-y-3 overflow-auto pr-1">
+                            {tasksByStatus[col].map(task => (
+                                <div
+                                    key={task.taskId}
+                                    draggable
+                                    onDragStart={(ev) => onDragStart(ev, task)}
+                                    onDragEnd={() => setDraggingTaskId(null)}
+                                    className={`bg-white rounded-md border p-3 cursor-grab ${draggingTaskId === task.taskId ? 'border-red-400' : 'hover:border-gray-300'}`}
+                                >
+                                    <div className="flex justify-between items-start">
+                                        <div className="font-medium text-gray-900">{task.title}</div>
+                                        <Badge variant={task.priority === 'HIGH' ? 'destructive' : task.priority === 'MEDIUM' ? 'default' : 'secondary'}>
+                                            <Flag className="h-3 w-3 mr-1" />{task.priority}
+                                        </Badge>
+                                    </div>
+                                    {task.description && <div className="text-xs text-gray-500 mt-1 line-clamp-2">{task.description}</div>}
+                                    <div className="flex items-center justify-between mt-2">
+                                        <div className="text-xs text-gray-500">{task.project?.name || 'No Project'}</div>
+                                        <div className="flex items-center text-xs text-gray-500"><Calendar className="h-3 w-3 mr-1" />{task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'No date'}</div>
+                                    </div>
+                                    <div className="flex justify-end gap-2 mt-2">
+                                        <Button variant="outline" size="sm" onClick={() => openEditDialog(task)}><Edit className="h-4 w-4" /></Button>
+                                        <Button variant="outline" size="sm" onClick={() => openAssignDialog(task)}><Users className="h-4 w-4" /></Button>
+                                        <AlertDialog>
+                                            <AlertDialogTrigger asChild><Button variant="outline" size="sm"><Trash2 className="h-4 w-4" /></Button></AlertDialogTrigger>
+                                            <AlertDialogContent>
+                                                <AlertDialogHeader>
+                                                    <AlertDialogTitle>Delete Task</AlertDialogTitle>
+                                                    <AlertDialogDescription>Are you sure you want to delete "{task.title}"?</AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                    <AlertDialogAction onClick={() => handleDeleteTask(task.taskId)}>Delete</AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
+                                    </div>
                                 </div>
-                                <div className="flex-1">
-                                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">{stat.title}</p>
-                                    <p className="text-lg font-bold text-gray-900">{stat.value}</p>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
+                            ))}
+                            {tasksByStatus[col].length === 0 && (
+                                <div className="text-xs text-gray-400">No tasks in this column.</div>
+                            )}
+                        </div>
+                    </div>
                 ))}
             </div>
-
-            <Card className="shadow-none">
-                <CardHeader>
-                    <CardTitle>Task List</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="flex flex-col md:flex-row gap-4 mb-6">
-                        <div className="flex-1">
-                            <div className="relative">
-                                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                                <Input
-                                    placeholder="Search tasks..."
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="pl-9 shadow-none"
-                                />
-                            </div>
-                        </div>
-                        <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                            <SelectTrigger className="w-full shadow-none md:w-40">
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="ALL">All Status</SelectItem>
-                                {TASK_STATUSES.map(status => (
-                                    <SelectItem key={status} value={status}>{status.replace('_', ' ')}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        <Select value={selectedPriority} onValueChange={setSelectedPriority}>
-                            <SelectTrigger className="w-full shadow-none md:w-40">
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="ALL">All Priority</SelectItem>
-                                {TASK_PRIORITIES.map(priority => (
-                                    <SelectItem key={priority} value={priority}>{priority}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        <Select value={selectedProject} onValueChange={setSelectedProject}>
-                            <SelectTrigger className="w-full shadow-none md:w-48">
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="ALL">All Projects</SelectItem>
-                                {projects.map(project => (
-                                    <SelectItem key={project.projectId} value={project.projectId.toString()}>
-                                        {project.name}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-
-                    <div className="border rounded-md">
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Task</TableHead>
-                                    <TableHead>Project</TableHead>
-                                    <TableHead>Priority</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead>Progress</TableHead>
-                                    <TableHead>Due Date</TableHead>
-                                    <TableHead className="text-right">Actions</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {filteredTasks.length === 0 ? (
-                                    <TableRow>
-                                        <TableCell colSpan={7} className="text-center py-8">
-                                            <div className="flex flex-col items-center justify-center">
-                                                <CheckSquare className="h-12 w-12 text-gray-400 mb-2" />
-                                                <p className="text-gray-500">No tasks found</p>
-                                            </div>
-                                        </TableCell>
-                                    </TableRow>
-                                ) : (
-                                    filteredTasks.map((task) => (
-                                        <TableRow key={task.taskId}>
-                                            <TableCell>
-                                                <div>
-                                                    <div className="font-medium">{task.title}</div>
-                                                    {task.description && (
-                                                        <div className="text-sm text-gray-500">
-                                                            {task.description.length > 50 ?
-                                                                `${task.description.substring(0, 50)}...` :
-                                                                task.description
-                                                            }
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>
-                                                {task.project?.name || 'No Project'}
-                                            </TableCell>
-                                            <TableCell>
-                                                <Badge variant={task.priority === 'HIGH' ? 'destructive' : task.priority === 'MEDIUM' ? 'default' : 'secondary'}>
-                                                    <Flag className="h-3 w-3 mr-1" />
-                                                    {task.priority}
-                                                </Badge>
-                                            </TableCell>
-                                            <TableCell>
-                                                <Badge variant={task.status === 'DONE' ? 'outline' : task.status === 'IN_PROGRESS' ? 'default' : 'secondary'}>
-                                                    {task.status.replace('_', ' ')}
-                                                </Badge>
-                                            </TableCell>
-                                            <TableCell>
-                                                <div className="flex items-center space-x-2">
-                                                    <Progress value={task.progressPercent || 0} className="w-16" />
-                                                    <span className="text-sm text-gray-500">
-                                                        {task.progressPercent || 0}%
-                                                    </span>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>
-                                                <div className="flex items-center">
-                                                    <Calendar className="h-4 w-4 mr-2 text-gray-400" />
-                                                    {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'No due date'}
-                                                </div>
-                                            </TableCell>
-                                            <TableCell className="text-right">
-                                                <div className="flex justify-end space-x-2">
-                                                    <Button
-                                                        variant="outline"
-                                                        size="sm"
-                                                        onClick={() => openEditDialog(task)}
-                                                    >
-                                                        <Edit className="h-4 w-4" />
-                                                    </Button>
-                                                    <Button
-                                                        variant="outline"
-                                                        size="sm"
-                                                        onClick={() => openAssignDialog(task)}
-                                                    >
-                                                        <Users className="h-4 w-4" />
-                                                    </Button>
-                                                    <AlertDialog>
-                                                        <AlertDialogTrigger asChild>
-                                                            <Button variant="outline" size="sm">
-                                                                <Trash2 className="h-4 w-4" />
-                                                            </Button>
-                                                        </AlertDialogTrigger>
-                                                        <AlertDialogContent>
-                                                            <AlertDialogHeader>
-                                                                <AlertDialogTitle>Delete Task</AlertDialogTitle>
-                                                                <AlertDialogDescription>
-                                                                    Are you sure you want to delete "{task.title}"? This action cannot be undone.
-                                                                </AlertDialogDescription>
-                                                            </AlertDialogHeader>
-                                                            <AlertDialogFooter>
-                                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                                <AlertDialogAction onClick={() => handleDeleteTask(task.taskId)}>
-                                                                    Delete
-                                                                </AlertDialogAction>
-                                                            </AlertDialogFooter>
-                                                        </AlertDialogContent>
-                                                    </AlertDialog>
-                                                </div>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))
-                                )}
-                            </TableBody>
-                        </Table>
-                    </div>
-                </CardContent>
-            </Card>
 
             <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
                 <DialogContent className="max-w-md">

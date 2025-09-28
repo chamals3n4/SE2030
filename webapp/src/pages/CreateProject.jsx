@@ -1,22 +1,9 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { ArrowLeft, ArrowRight, User, Mail, Phone, Building, MapPin, DollarSign, CalendarIcon } from "lucide-react"
+import { ArrowLeft, ArrowRight, User, Mail, Phone, Building, MapPin, DollarSign, CalendarIcon, CheckCircle2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card"
-import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from "@/components/ui/form"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Calendar as CalendarComponent } from "@/components/ui/calendar"
@@ -24,6 +11,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { useForm } from "react-hook-form"
 import { format } from "date-fns"
 import { projectAPI, clientAPI } from "@/services/api"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 export default function CreateProject() {
     const [currentStep, setCurrentStep] = useState(1)
@@ -34,6 +23,7 @@ export default function CreateProject() {
     const navigate = useNavigate()
 
     const clientForm = useForm({
+        mode: "onChange",
         defaultValues: {
             name: "",
             email: "",
@@ -42,13 +32,15 @@ export default function CreateProject() {
     })
 
     const projectForm = useForm({
+        mode: "onChange",
         defaultValues: {
             name: "",
             description: "",
             location: "",
             budget: "",
             startDate: "",
-            endDate: ""
+            endDate: "",
+            priority: "Medium"
         }
     })
 
@@ -90,8 +82,8 @@ export default function CreateProject() {
             if (email) {
                 try {
                     const existing = await clientAPI.search(email)
-                    const matches = Array.isArray(existing) ? existing : []
-                    const duplicate = matches.find(c => (c.email || "").toLowerCase() === email)
+                    const list = Array.isArray(existing?.data) ? existing.data : []
+                    const duplicate = list.find(c => (c.email || "").toLowerCase() === email)
                     if (duplicate) {
                         setCreatedClient(duplicate)
 
@@ -113,7 +105,7 @@ export default function CreateProject() {
             }
 
             const created = await clientAPI.create({ name, email, phone })
-            setCreatedClient(created)
+            setCreatedClient(created?.data)
 
             projectForm.reset({
                 name: "",
@@ -140,6 +132,18 @@ export default function CreateProject() {
             setIsLoading(true)
             resetError()
 
+            // simple date validation UX side
+            if (data.startDate && data.endDate) {
+                const start = new Date(data.startDate)
+                const end = new Date(data.endDate)
+                if (end < start) {
+                    setHasError(true)
+                    setErrorMessage("End date cannot be before start date")
+                    setIsLoading(false)
+                    return
+                }
+            }
+
             const projectData = {
                 name: data.name,
                 description: data.description,
@@ -148,14 +152,16 @@ export default function CreateProject() {
                 startDate: data.startDate,
                 plannedEndDate: data.endDate,
                 status: "PLANNED",
+                // priority is currently UI-only; backend doesn't persist a priority field on Project
+                // but we keep it in case later you add it server-side
                 client: {
-                    clientId: createdClient.clientId
+                    clientId: createdClient?.clientId
                 }
             }
 
             await projectAPI.create(projectData)
 
-            navigate('/projects-list')
+            navigate('/projects')
         } catch (error) {
             console.error('Error creating project:', error)
             setErrorMessage(error.response?.data?.message || "Failed to create project. Please try again.")
@@ -167,7 +173,7 @@ export default function CreateProject() {
 
     const handleBack = () => {
         if (currentStep === 1) {
-            navigate('/projects-list')
+            navigate('/projects')
         } else {
             setCurrentStep(1)
             resetError()
@@ -180,8 +186,8 @@ export default function CreateProject() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-            <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="min-h-screen flex flex-col justify-center py-10 sm:px-6 lg:px-8">
+            <div className="sm:mx-auto sm:w-full sm:max-w-2xl">
                 <div className="text-center">
                     <h2 className="text-3xl font-bold text-gray-900">
                         Create New Project
@@ -192,7 +198,15 @@ export default function CreateProject() {
                 </div>
             </div>
 
-            <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+            {/* stepper */}
+            <div className="sm:mx-auto sm:w-full sm:max-w-2xl mt-6">
+                <div className="grid grid-cols-2 gap-2">
+                    <div className={`h-2 rounded-full ${currentStep === 1 ? 'bg-red-500' : 'bg-red-200'}`}></div>
+                    <div className={`h-2 rounded-full ${currentStep === 2 ? 'bg-red-500' : 'bg-red-200'}`}></div>
+                </div>
+            </div>
+
+            <div className="mt-6 sm:mx-auto sm:w-full sm:max-w-2xl">
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
@@ -322,8 +336,8 @@ export default function CreateProject() {
                                         </Button>
                                         <Button
                                             type="submit"
-                                            className="flex-1 bg-blue-500 hover:bg-blue-600"
-                                            disabled={isLoading}
+                                            className="flex-1 bg-red-500 hover:bg-red-600"
+                                            disabled={isLoading || !clientForm.formState.isValid}
                                         >
                                             {isLoading ? "Creating Client..." : "Next"}
                                             <ArrowRight className="ml-2 h-4 w-4" />
@@ -334,6 +348,14 @@ export default function CreateProject() {
                         ) : (
                             <Form {...projectForm} key={`project-form-${currentStep}`}>
                                 <form onSubmit={projectForm.handleSubmit(handleCreateProject)} className="space-y-4" name="project-form" autoComplete="off">
+                                    {/* client summary */}
+                                    <div className="mb-1 text-sm text-gray-600 flex items-center gap-2">
+                                        <CheckCircle2 className="h-4 w-4 text-green-600" />
+                                        Creating for client:
+                                        <span className="font-medium text-gray-900">{createdClient?.name}</span>
+                                        {createdClient?.email && <span className="text-gray-500">• {createdClient.email}</span>}
+                                        {createdClient?.phone && <span className="text-gray-500">• {createdClient.phone}</span>}
+                                    </div>
                                     <FormField
                                         control={projectForm.control}
                                         name="name"
@@ -440,7 +462,7 @@ export default function CreateProject() {
                                         )}
                                     />
 
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <FormField
                                             control={projectForm.control}
                                             name="startDate"
@@ -506,6 +528,20 @@ export default function CreateProject() {
                                         />
                                     </div>
 
+                                    <div>
+                                        <Label>Priority</Label>
+                                        <Select value={projectForm.getValues("priority")} onValueChange={(value) => projectForm.setValue("priority", value)}>
+                                            <SelectTrigger>
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="Low">Low</SelectItem>
+                                                <SelectItem value="Medium">Medium</SelectItem>
+                                                <SelectItem value="High">High</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+
                                     <div className="flex gap-3 pt-4">
                                         <Button
                                             type="button"
@@ -518,8 +554,8 @@ export default function CreateProject() {
                                         </Button>
                                         <Button
                                             type="submit"
-                                            className="flex-1 bg-green-500 hover:bg-green-600"
-                                            disabled={isLoading}
+                                            className="flex-1 bg-red-500 hover:bg-red-600"
+                                            disabled={isLoading || !projectForm.formState.isValid}
                                         >
                                             {isLoading ? "Creating Project..." : "Create Project"}
                                         </Button>

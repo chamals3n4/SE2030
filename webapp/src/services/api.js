@@ -26,6 +26,7 @@ export const publicApi = axios.create({
 export const projectAPI = {
     getAll: () => api.get('/projects'),
     getById: (id) => api.get(`/projects/${id}`),
+    getDashboard: (id) => api.get(`/projects/${id}/dashboard`),
     create: (projectData) => api.post('/projects', projectData),
     update: (id, projectData) => api.put(`/projects/${id}`, projectData),
     delete: (id) => api.delete(`/projects/${id}`),
@@ -197,7 +198,8 @@ export const procurementOrderAPI = {
             quantity: quantity.toString(),
             ...(options.unitPrice && { unitPrice: options.unitPrice.toString() }),
             ...(options.expectedDeliveryDate && { expectedDeliveryDate: options.expectedDeliveryDate }),
-            ...(options.notes && { notes: options.notes })
+            ...(options.notes && { notes: options.notes }),
+            ...(options.projectId && { projectId: options.projectId.toString() })
         });
         return api.post(`/procurement-orders/create-order?${params}`);
     },
@@ -213,6 +215,81 @@ export const procurementOrderAPI = {
         const params = new URLSearchParams({ status });
         return api.put(`/procurement-orders/${id}/status?${params}`);
     }
+};
+
+export const financeAPI = {
+    create: (entry) => api.post('/finance', entry),
+    getByProject: (projectId) => api.get(`/finance/by-project/${projectId}`),
+    getByProjectBetween: (projectId, start, end) => api.get(`/finance/by-project/${projectId}/between?start=${start}&end=${end}`),
+    summary: (projectId) => api.get(`/finance/summary/${projectId}`),
+    update: (id, entry) => api.put(`/finance/${id}`, entry),
+    delete: (id) => api.delete(`/finance/${id}`)
+};
+
+export const supplierStoreAPI = {
+    getAll: () => api.get('/supplier-stores'),
+    getById: (id) => api.get(`/supplier-stores/${id}`),
+    getBySupplier: (supplierId) => api.get(`/supplier-stores/supplier/${supplierId}`),
+    create: (storeData) => api.post('/supplier-stores', storeData),
+    createForSupplier: (supplierId, storeData) => api.post(`/supplier-stores/supplier/${supplierId}`, storeData),
+    update: (id, storeData) => api.put(`/supplier-stores/${id}`, storeData),
+    delete: (id) => api.delete(`/supplier-stores/${id}`),
+    getActive: () => api.get('/supplier-stores/active'),
+    getByStatus: (status) => api.get(`/supplier-stores/status/${status}`)
+};
+
+export const purchaseOrderAPI = {
+    getAll: () => api.get('/purchase-orders'),
+    getById: (id) => api.get(`/purchase-orders/${id}`),
+    getBySupplier: (supplierId) => api.get(`/purchase-orders/supplier/${supplierId}`),
+    getByProject: (projectId) => api.get(`/purchase-orders/project/${projectId}`),
+    getByStatus: (status) => api.get(`/purchase-orders/status/${status}`),
+    create: (orderData) => api.post('/purchase-orders', orderData),
+    createFromCart: (supplierId, projectId, items, notes) => {
+        const params = new URLSearchParams({
+            supplierId: supplierId.toString(),
+            ...(projectId && { projectId: projectId.toString() }),
+            ...(notes && { notes })
+        });
+        return api.post(`/purchase-orders/from-cart?${params}`, items);
+    },
+    updateStatus: (id, status) => api.put(`/purchase-orders/${id}/status?status=${status}`),
+    delete: (id) => api.delete(`/purchase-orders/${id}`),
+    getTotalBySupplier: (supplierId) => api.get(`/purchase-orders/supplier/${supplierId}/total`)
+};
+
+export const stockAPI = {
+    getAll: () => api.get('/company-stock'),
+    getById: (id) => api.get(`/company-stock/${id}`),
+    getByType: (resourceType) => api.get(`/company-stock/type/${resourceType}`),
+    getByStatus: (status) => api.get(`/company-stock/status/${status}`),
+    getBySupplier: (supplierId) => api.get(`/company-stock/supplier/${supplierId}`),
+    getLowStock: () => api.get('/company-stock/low-stock'),
+    search: (name) => api.get(`/company-stock/search?name=${encodeURIComponent(name)}`),
+    create: (stockData) => api.post('/company-stock', stockData),
+    addFromPurchase: (supplierId, resourceId, resourceType, quantity, unitCost, name, description) => {
+        const params = new URLSearchParams({
+            supplierId: supplierId.toString(),
+            resourceId: resourceId.toString(),
+            resourceType,
+            quantity: quantity.toString(),
+            unitCost: unitCost.toString(),
+            name,
+            ...(description && { description })
+        });
+        return api.post(`/company-stock/from-purchase?${params}`);
+    },
+    update: (id, stockData) => api.put(`/company-stock/${id}`, stockData),
+    adjust: (id, quantityChange, notes) => {
+        const params = new URLSearchParams({
+            quantityChange: quantityChange.toString(),
+            ...(notes && { notes })
+        });
+        return api.put(`/company-stock/${id}/adjust?${params}`);
+    },
+    delete: (id) => api.delete(`/company-stock/${id}`),
+    getTotalValue: () => api.get('/company-stock/total-value'),
+    getMovements: () => api.get('/stock-movements')
 };
 
 export default api;

@@ -1,7 +1,7 @@
-// TODO : fetch real data
+// Fetch real data from backend
 
 import { useState, useEffect } from "react"
-import { useSearchParams, Link } from "react-router-dom"
+import { useSearchParams, useParams, Link } from "react-router-dom"
 import {
     TrendingUp,
     TrendingDown,
@@ -33,100 +33,9 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
+import { projectAPI, taskAPI } from "@/services/api"
 
-// Mock data for projects - should match ProjectList data
-const mockProjects = [
-    {
-        id: 1,
-        name: "Modern Office Complex",
-        description: "A state-of-the-art office building with sustainable design and smart technology integration.",
-        location: "Downtown Business District",
-        budget: 2500000,
-        startDate: "2024-01-15",
-        endDate: "2024-12-30",
-        status: "In Progress",
-        teamSize: 25,
-        progress: 65,
-        spent: 1625000,
-        manager: "John Smith",
-        priority: "High"
-    },
-    {
-        id: 2,
-        name: "Residential Tower",
-        description: "Luxury residential tower with 40 floors and premium amenities for urban living.",
-        location: "Metro City Center",
-        budget: 5200000,
-        startDate: "2024-03-01",
-        endDate: "2025-08-15",
-        status: "Planning",
-        teamSize: 45,
-        progress: 15,
-        spent: 780000,
-        manager: "Sarah Johnson",
-        priority: "Medium"
-    },
-    {
-        id: 3,
-        name: "Shopping Mall Renovation",
-        description: "Complete renovation of existing shopping mall with modern retail spaces and entertainment areas.",
-        location: "Suburban Mall District",
-        budget: 1800000,
-        startDate: "2023-10-01",
-        endDate: "2024-06-30",
-        status: "Completing",
-        teamSize: 18,
-        progress: 85,
-        spent: 1530000,
-        manager: "Mike Wilson",
-        priority: "High"
-    },
-    {
-        id: 4,
-        name: "Highway Bridge Construction",
-        description: "Construction of a new highway bridge to improve transportation infrastructure.",
-        location: "Interstate Route 45",
-        budget: 8500000,
-        startDate: "2024-05-01",
-        endDate: "2026-03-30",
-        status: "In Progress",
-        teamSize: 60,
-        progress: 30,
-        spent: 2550000,
-        manager: "Emily Davis",
-        priority: "Critical"
-    },
-    {
-        id: 5,
-        name: "School Campus Expansion",
-        description: "Expansion of university campus with new academic buildings and student facilities.",
-        location: "University District",
-        budget: 4200000,
-        startDate: "2024-02-15",
-        endDate: "2025-01-30",
-        status: "In Progress",
-        teamSize: 35,
-        progress: 45,
-        spent: 1890000,
-        manager: "David Brown",
-        priority: "Medium"
-    },
-    {
-        id: 6,
-        name: "Hospital Wing Addition",
-        description: "New medical wing addition with advanced equipment and patient care facilities.",
-        location: "Medical Center",
-        budget: 6800000,
-        startDate: "2024-04-01",
-        endDate: "2025-09-30",
-        status: "Planning",
-        teamSize: 42,
-        progress: 10,
-        spent: 680000,
-        manager: "Lisa Chen",
-        priority: "High"
-    }
-]
+// Activities remain mocked for now
 
 // Mock project-specific activities
 const getProjectActivities = (projectId) => {
@@ -175,6 +84,12 @@ const getProjectTasks = (projectId) => {
 }
 
 const statusColors = {
+    "PLANNED": "bg-blue-100 text-blue-800",
+    "IN_PROGRESS": "bg-green-100 text-green-800",
+    "COMPLETING": "bg-yellow-100 text-yellow-800",
+    "COMPLETED": "bg-gray-100 text-gray-800",
+    "ON_HOLD": "bg-red-100 text-red-800",
+    // also allow humanized keys
     "Planning": "bg-blue-100 text-blue-800",
     "In Progress": "bg-green-100 text-green-800",
     "Completing": "bg-yellow-100 text-yellow-800",
@@ -191,25 +106,89 @@ const priorityColors = {
 
 export default function Projects() {
     const [searchParams] = useSearchParams()
+    const { projectId: routeProjectId } = useParams()
     const [selectedProject, setSelectedProject] = useState(null)
+    const [projectTasks, setProjectTasks] = useState([])
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState("")
 
     useEffect(() => {
-        const projectId = searchParams.get('projectId')
-        if (projectId) {
-            const project = mockProjects.find(p => p.id === parseInt(projectId))
-            setSelectedProject(project)
-        } else {
-            // Default to first project if no ID specified
-            setSelectedProject(mockProjects[0])
+        const load = async () => {
+            try {
+                setLoading(true)
+                setError("")
+                let pid = routeProjectId || searchParams.get('projectId')
+                if (!pid) {
+                    const all = await projectAPI.getAll()
+                    const first = (all?.data || [])[0]
+                    if (!first) {
+                        setSelectedProject(null)
+                        setProjectTasks([])
+                        return
+                    }
+                    pid = first.projectId
+                }
+                const [dashRes, tasksRes] = await Promise.all([
+                    projectAPI.getDashboard(pid),
+                    taskAPI.getByProject(pid)
+                ])
+                const dash = dashRes?.data
+                const tasks = tasksRes?.data || []
+                // map backend task model to UI cells
+                const mappedTasks = tasks.map(t => ({
+                    id: t.taskId,
+                    name: t.title,
+                    status: t.status === 'DONE' ? 'Completed' : (t.status === 'IN_PROGRESS' ? 'In Progress' : 'Pending'),
+                    assignee: '-', // could fetch assignments; keep simple for now
+                    dueDate: t.dueDate,
+                    priority: t.priority === 'HIGH' ? 'High' : (t.priority === 'MEDIUM' ? 'Medium' : 'Low')
+                }))
+                // map dashboard dto to UI model (preserve existing field names)
+                const mappedProject = {
+                    id: dash.projectId,
+                    name: dash.name,
+                    description: dash.description,
+                    location: dash.location,
+                    budget: Number(dash.budget || 0),
+                    startDate: dash.startDate,
+                    endDate: dash.endDate,
+                    status: dash.status,
+                    teamSize: dash.teamSize ?? 0,
+                    progress: dash.progress ?? 0,
+                    spent: Number(dash.spent || 0),
+                    manager: dash.manager || '—',
+                    priority: dash.priority || 'Medium',
+                    clientName: dash.clientName || '—',
+                    openIssues: dash.openIssues ?? 0,
+                    criticalIssues: dash.criticalIssues ?? 0
+                }
+                setSelectedProject(mappedProject)
+                setProjectTasks(mappedTasks)
+            } catch (e) {
+                setError('Failed to load project')
+                setSelectedProject(null)
+                setProjectTasks([])
+            } finally {
+                setLoading(false)
+            }
         }
+        load()
     }, [searchParams])
+
+    if (loading) {
+        return (
+            <div className="p-6">
+                <div className="text-center py-12">Loading project...</div>
+            </div>
+        )
+    }
 
     if (!selectedProject) {
         return (
             <div className="p-6">
                 <div className="text-center py-12">
                     <h2 className="text-2xl font-semibold text-gray-900">No Project Selected</h2>
-                    <p className="text-gray-600 mt-2">Please select a project from the project list.</p>
+                    <p className="text-gray-600 mt-2">{error || 'Please select a project from the project list.'}</p>
                     <Link to="/">
                         <Button className="mt-4 bg-red-500 hover:bg-red-600">
                             Go to Project List
@@ -259,7 +238,14 @@ export default function Projects() {
     }
 
     const projectActivities = getProjectActivities(selectedProject.id)
-    const projectTasks = getProjectTasks(selectedProject.id)
+    const statusKey = statusColors[selectedProject.status] ? selectedProject.status : (
+        // try humanized fallback
+        selectedProject.status === 'PLANNED' ? 'Planning' :
+            selectedProject.status === 'IN_PROGRESS' ? 'In Progress' :
+                selectedProject.status === 'COMPLETING' ? 'Completing' :
+                    selectedProject.status === 'COMPLETED' ? 'Completed' :
+                        selectedProject.status === 'ON_HOLD' ? 'On Hold' : selectedProject.status
+    )
 
     return (
         <div className="p-6 space-y-6">
@@ -312,14 +298,17 @@ export default function Projects() {
 
                 <Card className="shadow-none">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Team Size</CardTitle>
-                        <Users className="h-4 w-4 text-muted-foreground" />
+                        <CardTitle className="text-sm font-medium">Open Issues</CardTitle>
+                        <AlertTriangle className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{selectedProject.teamSize}</div>
-                        <p className="text-xs text-muted-foreground">
-                            Active members
-                        </p>
+                        <div className="text-2xl font-bold flex items-center gap-2">
+                            {selectedProject.openIssues ?? 0}
+                            {(selectedProject.criticalIssues ?? 0) > 0 && (
+                                <span className="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-700">{selectedProject.criticalIssues} critical</span>
+                            )}
+                        </div>
+                        <p className="text-xs text-muted-foreground">Issues not closed</p>
                     </CardContent>
                 </Card>
 
@@ -366,8 +355,8 @@ export default function Projects() {
                         <div className="flex items-center gap-3">
                             <Users className="h-5 w-5 text-gray-500" />
                             <div>
-                                <p className="text-sm font-medium">Project Manager</p>
-                                <p className="text-sm text-gray-600">{selectedProject.manager}</p>
+                                <p className="text-sm font-medium">Client</p>
+                                <p className="text-sm text-gray-600">{selectedProject.clientName || '—'}</p>
                             </div>
                         </div>
 

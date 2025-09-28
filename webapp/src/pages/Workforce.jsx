@@ -43,8 +43,7 @@ export default function Workforce() {
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [editingEmployee, setEditingEmployee] = useState(null);
     const [formData, setFormData] = useState({
-        firstName: '',
-        lastName: '',
+        name: '',
         nic: '',
         phone: '',
         role: '',
@@ -79,8 +78,6 @@ export default function Workforce() {
 
         if (searchTerm) {
             filtered = filtered.filter(employee =>
-                employee.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                employee.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 employee.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 employee.nic?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 employee.role?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -157,8 +154,7 @@ export default function Workforce() {
     const openEditDialog = (employee) => {
         setEditingEmployee(employee);
         setFormData({
-            firstName: employee.firstName || '',
-            lastName: employee.lastName || '',
+            name: employee.name || '',
             nic: employee.nic || '',
             phone: employee.phone || '',
             role: employee.role || '',
@@ -171,8 +167,7 @@ export default function Workforce() {
 
     const resetForm = () => {
         setFormData({
-            firstName: '',
-            lastName: '',
+            name: '',
             nic: '',
             phone: '',
             role: '',
@@ -234,25 +229,14 @@ export default function Workforce() {
                             <DialogTitle>Add New Employee</DialogTitle>
                         </DialogHeader>
                         <form onSubmit={handleCreateEmployee} className="space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <Label htmlFor="firstName">First Name</Label>
-                                    <Input
-                                        id="firstName"
-                                        value={formData.firstName}
-                                        onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                                        required
-                                    />
-                                </div>
-                                <div>
-                                    <Label htmlFor="lastName">Last Name</Label>
-                                    <Input
-                                        id="lastName"
-                                        value={formData.lastName}
-                                        onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                                        required
-                                    />
-                                </div>
+                            <div>
+                                <Label htmlFor="name">Full Name</Label>
+                                <Input
+                                    id="name"
+                                    value={formData.name}
+                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                    required
+                                />
                             </div>
                             <div>
                                 <Label htmlFor="nic">NIC</Label>
@@ -400,10 +384,7 @@ export default function Workforce() {
                                     filteredEmployees.map((employee) => (
                                         <TableRow key={employee.employeeId}>
                                             <TableCell>
-                                                <div>
-                                                    <div className="font-medium">{employee.name || `${employee.firstName} ${employee.lastName}`}</div>
-                                                    <div className="text-sm text-gray-500">{employee.firstName} {employee.lastName}</div>
-                                                </div>
+                                                <div className="font-medium">{employee.name}</div>
                                             </TableCell>
                                             <TableCell>{employee.nic}</TableCell>
                                             <TableCell>
@@ -493,25 +474,14 @@ export default function Workforce() {
                         <DialogTitle>Edit Employee</DialogTitle>
                     </DialogHeader>
                     <form onSubmit={handleUpdateEmployee} className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <Label htmlFor="editFirstName">First Name</Label>
-                                <Input
-                                    id="editFirstName"
-                                    value={formData.firstName}
-                                    onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <Label htmlFor="editLastName">Last Name</Label>
-                                <Input
-                                    id="editLastName"
-                                    value={formData.lastName}
-                                    onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                                    required
-                                />
-                            </div>
+                        <div>
+                            <Label htmlFor="editName">Full Name</Label>
+                            <Input
+                                id="editName"
+                                value={formData.name}
+                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                required
+                            />
                         </div>
                         <div>
                             <Label htmlFor="editNic">NIC</Label>

@@ -10,7 +10,7 @@ import { Label } from '../components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Textarea } from '../components/ui/textarea';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
-import { Search, Plus, Edit, Trash2, Calendar, AlertTriangle, Bug, User, UserCheck, X, CheckCircle, Clock, AlertCircle, XCircle } from 'lucide-react';
+import { Search, Plus, Edit, Trash2, Calendar, AlertTriangle, Bug, User, UserCheck, X, CheckCircle, Clock, AlertCircle, XCircle, CircleDot } from 'lucide-react';
 import { toast } from 'sonner';
 
 const ISSUE_STATUSES = ['OPEN', 'IN_PROGRESS', 'RESOLVED', 'CLOSED'];
@@ -62,7 +62,7 @@ export default function IssuesDefects() {
             const [issuesRes, projectsRes, employeesRes] = await Promise.all([
                 issueAPI.getAll(),
                 projectAPI.getAll(),
-                employeeAPI.getActive()
+                employeeAPI.getAll()
             ]);
             setIssues(issuesRes.data);
             setProjects(projectsRes.data);
@@ -87,7 +87,15 @@ export default function IssuesDefects() {
         }
 
         if (selectedStatus !== 'ALL') {
-            filtered = filtered.filter(issue => issue.status === selectedStatus);
+            if (selectedStatus === 'ACTIVE') {
+                const activeSet = new Set(['OPEN', 'IN_PROGRESS']);
+                filtered = filtered.filter(issue => activeSet.has(issue.status));
+            } else if (selectedStatus === 'DONE') {
+                const doneSet = new Set(['RESOLVED', 'CLOSED', 'COMPLETED']);
+                filtered = filtered.filter(issue => doneSet.has(issue.status));
+            } else {
+                filtered = filtered.filter(issue => issue.status === selectedStatus);
+            }
         }
 
         if (selectedSeverity !== 'ALL') {
@@ -197,14 +205,15 @@ export default function IssuesDefects() {
     const getStatsCards = () => {
         const openCount = issues.filter(i => i.status === 'OPEN').length;
         const inProgressCount = issues.filter(i => i.status === 'IN_PROGRESS').length;
-        const resolvedCount = issues.filter(i => i.status === 'RESOLVED').length;
-        const criticalCount = issues.filter(i => i.severity === 'CRITICAL' && i.status !== 'CLOSED').length;
+        const doneStatuses = new Set(['RESOLVED', 'CLOSED', 'COMPLETED']);
+        const doneCount = issues.filter(i => doneStatuses.has(i.status)).length;
+        const criticalCount = issues.filter(i => i.severity === 'CRITICAL').length;
 
         return [
-            { title: 'Total Issues', value: issues.length, icon: Bug, color: 'text-blue-600', bgColor: 'bg-blue-50' },
-            { title: 'Open', value: openCount, icon: AlertCircle, color: 'text-red-600', bgColor: 'bg-red-50' },
-            { title: 'In Progress', value: inProgressCount, icon: Clock, color: 'text-orange-600', bgColor: 'bg-orange-50' },
-            { title: 'Critical', value: criticalCount, icon: AlertTriangle, color: 'text-purple-600', bgColor: 'bg-purple-50' }
+            { title: 'Open', value: openCount, icon: AlertCircle, color: 'text-green-700', bgColor: 'bg-green-50' },
+            { title: 'Done', value: doneCount, icon: CheckCircle, color: 'text-gray-700', bgColor: 'bg-gray-100' },
+            { title: 'In Progress', value: inProgressCount, icon: Clock, color: 'text-orange-700', bgColor: 'bg-orange-50' },
+            { title: 'Critical', value: criticalCount, icon: AlertTriangle, color: 'text-rose-700', bgColor: 'bg-rose-50' }
         ];
     };
 
@@ -341,174 +350,97 @@ export default function IssuesDefects() {
 
             <Card className="shadow-none">
                 <CardHeader>
-                    <CardTitle>Issue List</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="flex flex-col md:flex-row gap-4 mb-6">
-                        <div className="flex-1">
-                            <div className="relative">
-                                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                                <Input
-                                    placeholder="Search issues..."
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="pl-9 shadow-none"
-                                />
+                    <div className="flex flex-col gap-3">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4 text-sm">
+                                <button onClick={() => setSelectedStatus('OPEN')} className={`px-2 py-1 rounded ${selectedStatus === 'OPEN' ? 'bg-green-100 text-green-700' : 'text-gray-700 hover:bg-gray-100'}`}>
+                                    Open {issues.filter(i => i.status === 'OPEN').length}
+                                </button>
+                                <button onClick={() => setSelectedStatus('CLOSED')} className={`px-2 py-1 rounded ${selectedStatus === 'CLOSED' ? 'bg-gray-100 text-gray-800' : 'text-gray-700 hover:bg-gray-100'}`}>
+                                    Closed {issues.filter(i => i.status === 'CLOSED').length}
+                                </button>
+                            </div>
+                            <div className="flex gap-2">
+                                <Button onClick={() => setIsCreateDialogOpen(true)}><Plus className="h-4 w-4 mr-2" />New issue</Button>
                             </div>
                         </div>
-                        <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                            <SelectTrigger className="w-full shadow-none md:w-40">
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="ALL">All Status</SelectItem>
-                                {ISSUE_STATUSES.map(status => (
-                                    <SelectItem key={status} value={status}>{status.replace('_', ' ')}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        <Select value={selectedSeverity} onValueChange={setSelectedSeverity}>
-                            <SelectTrigger className="w-full shadow-none md:w-40">
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="ALL">All Severity</SelectItem>
-                                {ISSUE_SEVERITIES.map(severity => (
-                                    <SelectItem key={severity} value={severity}>{severity}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        <Select value={selectedProject} onValueChange={setSelectedProject}>
-                            <SelectTrigger className="w-full shadow-none md:w-48">
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="ALL">All Projects</SelectItem>
-                                {projects.map(project => (
-                                    <SelectItem key={project.projectId} value={project.projectId.toString()}>
-                                        {project.name}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                        <div className="flex flex-col md:flex-row gap-3">
+                            <div className="relative flex-1">
+                                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                                <Input className="pl-9 shadow-none" placeholder="Search issues" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                            </div>
+                            <Select value={selectedSeverity} onValueChange={setSelectedSeverity}>
+                                <SelectTrigger className="w-full shadow-none md:w-40">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="ALL">All Severity</SelectItem>
+                                    {ISSUE_SEVERITIES.map(severity => (
+                                        <SelectItem key={severity} value={severity}>{severity}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <Select value={selectedProject} onValueChange={setSelectedProject}>
+                                <SelectTrigger className="w-full shadow-none md:w-48">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="ALL">All Projects</SelectItem>
+                                    {projects.map(project => (
+                                        <SelectItem key={project.projectId} value={project.projectId.toString()}>
+                                            {project.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
                     </div>
-
-                    <div className="border rounded-md">
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Issue</TableHead>
-                                    <TableHead>Project</TableHead>
-                                    <TableHead>Severity</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead>Assigned To</TableHead>
-                                    <TableHead>Reported Date</TableHead>
-                                    <TableHead className="text-right">Actions</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {filteredIssues.length === 0 ? (
-                                    <TableRow>
-                                        <TableCell colSpan={7} className="text-center py-8">
-                                            <div className="flex flex-col items-center justify-center">
-                                                <Bug className="h-12 w-12 text-gray-400 mb-2" />
-                                                <p className="text-gray-500">No issues found</p>
+                </CardHeader>
+                <CardContent>
+                    {filteredIssues.length === 0 ? (
+                        <div className="text-center py-10 text-gray-500">No issues match your filters.</div>
+                    ) : (
+                        <div className="divide-y border rounded-md">
+                            {filteredIssues.map(issue => (
+                                <div key={issue.issueId} className="flex items-start justify-between p-4 hover:bg-gray-50">
+                                    <div className="flex items-start gap-3">
+                                        {issue.status === 'CLOSED' ? (
+                                            <CheckCircle className="h-4 w-4 text-gray-500 mt-1" />
+                                        ) : (
+                                            <CircleDot className="h-4 w-4 text-green-600 mt-1" />
+                                        )}
+                                        <div>
+                                            <div className="font-medium text-gray-900">{issue.title}</div>
+                                            <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-500">
+                                                <Badge variant={issue.severity === 'CRITICAL' || issue.severity === 'HIGH' ? 'destructive' : 'default'}>{issue.severity}</Badge>
+                                                <span>{issue.project?.name || 'No Project'}</span>
+                                                <span>•</span>
+                                                <span>Reported {issue.reportedDate ? new Date(issue.reportedDate).toLocaleDateString() : 'N/A'}</span>
+                                                {issue.assignedTo && (<><span>•</span><span className="flex items-center"><User className="h-3 w-3 mr-1" />{issue.assignedTo.name}</span></>)}
                                             </div>
-                                        </TableCell>
-                                    </TableRow>
-                                ) : (
-                                    filteredIssues.map((issue) => (
-                                        <TableRow key={issue.issueId}>
-                                            <TableCell>
-                                                <div>
-                                                    <div className="font-medium">{issue.title}</div>
-                                                    {issue.description && (
-                                                        <div className="text-sm text-gray-500">
-                                                            {issue.description.length > 50 ?
-                                                                `${issue.description.substring(0, 50)}...` :
-                                                                issue.description
-                                                            }
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>
-                                                {issue.project?.name || 'No Project'}
-                                            </TableCell>
-                                            <TableCell>
-                                                <Badge variant={issue.severity === 'CRITICAL' || issue.severity === 'HIGH' ? 'destructive' : issue.severity === 'MEDIUM' ? 'default' : 'secondary'}>
-                                                    <AlertTriangle className="h-3 w-3 mr-1" />
-                                                    {issue.severity}
-                                                </Badge>
-                                            </TableCell>
-                                            <TableCell>
-                                                <Badge variant={issue.status === 'OPEN' ? 'destructive' : issue.status === 'IN_PROGRESS' ? 'default' : 'outline'}>
-                                                    {issue.status.replace('_', ' ')}
-                                                </Badge>
-                                            </TableCell>
-                                            <TableCell>
-                                                <div className="flex items-center">
-                                                    {issue.assignedTo ? (
-                                                        <>
-                                                            <User className="h-4 w-4 mr-2 text-gray-400" />
-                                                            {issue.assignedTo.name}
-                                                        </>
-                                                    ) : (
-                                                        <span className="text-gray-500">Unassigned</span>
-                                                    )}
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>
-                                                <div className="flex items-center">
-                                                    <Calendar className="h-4 w-4 mr-2 text-gray-400" />
-                                                    {issue.reportedDate ? new Date(issue.reportedDate).toLocaleDateString() : 'N/A'}
-                                                </div>
-                                            </TableCell>
-                                            <TableCell className="text-right">
-                                                <div className="flex justify-end space-x-2">
-                                                    <Button
-                                                        variant="outline"
-                                                        size="sm"
-                                                        onClick={() => openEditDialog(issue)}
-                                                    >
-                                                        <Edit className="h-4 w-4" />
-                                                    </Button>
-                                                    <Button
-                                                        variant="outline"
-                                                        size="sm"
-                                                        onClick={() => openAssignDialog(issue)}
-                                                    >
-                                                        <UserCheck className="h-4 w-4" />
-                                                    </Button>
-                                                    <AlertDialog>
-                                                        <AlertDialogTrigger asChild>
-                                                            <Button variant="outline" size="sm">
-                                                                <Trash2 className="h-4 w-4" />
-                                                            </Button>
-                                                        </AlertDialogTrigger>
-                                                        <AlertDialogContent>
-                                                            <AlertDialogHeader>
-                                                                <AlertDialogTitle>Delete Issue</AlertDialogTitle>
-                                                                <AlertDialogDescription>
-                                                                    Are you sure you want to delete "{issue.title}"? This action cannot be undone.
-                                                                </AlertDialogDescription>
-                                                            </AlertDialogHeader>
-                                                            <AlertDialogFooter>
-                                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                                <AlertDialogAction onClick={() => handleDeleteIssue(issue.issueId)}>
-                                                                    Delete
-                                                                </AlertDialogAction>
-                                                            </AlertDialogFooter>
-                                                        </AlertDialogContent>
-                                                    </AlertDialog>
-                                                </div>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))
-                                )}
-                            </TableBody>
-                        </Table>
-                    </div>
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <Button variant="outline" size="sm" onClick={() => openEditDialog(issue)}><Edit className="h-4 w-4" /></Button>
+                                        <Button variant="outline" size="sm" onClick={() => openAssignDialog(issue)}><UserCheck className="h-4 w-4" /></Button>
+                                        <AlertDialog>
+                                            <AlertDialogTrigger asChild><Button variant="outline" size="sm"><Trash2 className="h-4 w-4" /></Button></AlertDialogTrigger>
+                                            <AlertDialogContent>
+                                                <AlertDialogHeader>
+                                                    <AlertDialogTitle>Delete Issue</AlertDialogTitle>
+                                                    <AlertDialogDescription>Are you sure you want to delete "{issue.title}"?</AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                    <AlertDialogAction onClick={() => handleDeleteIssue(issue.issueId)}>Delete</AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </CardContent>
             </Card>
 

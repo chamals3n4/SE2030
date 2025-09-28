@@ -15,7 +15,7 @@ import {
     SidebarTrigger,
 } from "@/components/ui/sidebar"
 
-export default function Layout() {
+export default function Layout({ children }) {
     return (
         <SidebarProvider>
             <AppSidebar />
@@ -41,7 +41,7 @@ export default function Layout() {
                     </Breadcrumb>
                 </header>
                 <main className="flex flex-1 flex-col">
-                    <Outlet />
+                    {children ?? <Outlet />}
                 </main>
             </SidebarInset>
         </SidebarProvider>
