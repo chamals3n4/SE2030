@@ -43,11 +43,6 @@ public class Issue {
     @Column(name = "attachment_url")
     private String attachmentUrl;
 
-    @Column(name = "created_date")
-    private LocalDateTime createdDate;
-
-    @Column(name = "updated_date")
-    private LocalDateTime updatedDate;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
@@ -67,57 +62,47 @@ public class Issue {
     private String resolutionNotes;
 
     public Issue() {
-        this.createdDate = LocalDateTime.now();
-        this.updatedDate = LocalDateTime.now();
         this.status = "OPEN";
         this.severity = "MEDIUM";
         this.reportedDate = LocalDate.now();
     }
 
     public Long getIssueId() { return issueId; }
-    public void setIssueId(Long issueId) { this.issueId = issueId; }
 
     public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; this.updatedDate = LocalDateTime.now(); }
+    public void setTitle(String title) { this.title = title; }
 
     public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; this.updatedDate = LocalDateTime.now(); }
+    public void setDescription(String description) { this.description = description; }
 
     public String getSeverity() { return severity; }
-    public void setSeverity(String severity) { this.severity = severity; this.updatedDate = LocalDateTime.now(); }
+    public void setSeverity(String severity) { this.severity = severity; }
 
     public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; this.updatedDate = LocalDateTime.now(); }
+    public void setStatus(String status) { this.status = status; }
 
     public LocalDate getReportedDate() { return reportedDate; }
-    public void setReportedDate(LocalDate reportedDate) { this.reportedDate = reportedDate; this.updatedDate = LocalDateTime.now(); }
+    public void setReportedDate(LocalDate reportedDate) { this.reportedDate = reportedDate; }
 
     public LocalDate getResolvedDate() { return resolvedDate; }
-    public void setResolvedDate(LocalDate resolvedDate) { this.resolvedDate = resolvedDate; this.updatedDate = LocalDateTime.now(); }
+    public void setResolvedDate(LocalDate resolvedDate) { this.resolvedDate = resolvedDate; }
 
     public String getAttachmentUrl() { return attachmentUrl; }
-    public void setAttachmentUrl(String attachmentUrl) { this.attachmentUrl = attachmentUrl; this.updatedDate = LocalDateTime.now(); }
+    public void setAttachmentUrl(String attachmentUrl) { this.attachmentUrl = attachmentUrl; }
 
-    public LocalDateTime getCreatedDate() { return createdDate; }
-    public void setCreatedDate(LocalDateTime createdDate) { this.createdDate = createdDate; }
-
-    public LocalDateTime getUpdatedDate() { return updatedDate; }
-    public void setUpdatedDate(LocalDateTime updatedDate) { this.updatedDate = updatedDate; }
 
     public Project getProject() { return project; }
-    public void setProject(Project project) { this.project = project; this.updatedDate = LocalDateTime.now(); }
+    public void setProject(Project project) { this.project = project; }
 
     public Employee getAssignedTo() { return assignedTo; }
-    public void setAssignedTo(Employee assignedTo) { this.assignedTo = assignedTo; this.updatedDate = LocalDateTime.now(); }
+    public void setAssignedTo(Employee assignedTo) { this.assignedTo = assignedTo; }
 
     public Employee getClosedBy() { return closedBy; }
-    public void setClosedBy(Employee closedBy) { this.closedBy = closedBy; this.updatedDate = LocalDateTime.now(); }
+    public void setClosedBy(Employee closedBy) { this.closedBy = closedBy; }
 
     public String getResolutionNotes() { return resolutionNotes; }
-    public void setResolutionNotes(String resolutionNotes) { this.resolutionNotes = resolutionNotes; this.updatedDate = LocalDateTime.now(); }
+    public void setResolutionNotes(String resolutionNotes) { this.resolutionNotes = resolutionNotes; }
 
-    @PreUpdate
-    public void preUpdate() { this.updatedDate = LocalDateTime.now(); }
 }
 
 

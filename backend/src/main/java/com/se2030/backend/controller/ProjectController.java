@@ -1,8 +1,7 @@
 package com.se2030.backend.controller;
 
 import com.se2030.backend.model.Project;
-import com.se2030.backend.model.Task;
-import com.se2030.backend.model.Issue;
+import com.se2030.backend.dto.ProjectDashboardDTO;
 import com.se2030.backend.service.ProjectService;
 import com.se2030.backend.service.TaskService;
 import com.se2030.backend.service.IssueService;
@@ -59,26 +58,12 @@ public class ProjectController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @GetMapping("/by-client/{clientId}")
-    public ResponseEntity<List<Project>> getByClient(@PathVariable("clientId") Long clientId) {
-        return new ResponseEntity<>(projectService.findByClient(clientId), HttpStatus.OK);
-    }
 
-    @GetMapping("/status/{status}")
-    public ResponseEntity<List<Project>> getByStatus(@PathVariable("status") String status) {
-        return new ResponseEntity<>(projectService.findByStatus(status), HttpStatus.OK);
-    }
-
-    @GetMapping("/started-between")
-    public ResponseEntity<List<Project>> getByStartBetween(
-            @RequestParam("start") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
-            @RequestParam("end") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
-        return new ResponseEntity<>(projectService.findByStartDateBetween(start, end), HttpStatus.OK);
-    }
-
-    @GetMapping("/search")
-    public ResponseEntity<List<Project>> search(@RequestParam("q") String q) {
-        return new ResponseEntity<>(projectService.search(q), HttpStatus.OK);
+    @GetMapping("/{id}/dashboard")
+    public ResponseEntity<ProjectDashboardDTO> getDashboard(@PathVariable("id") Long id) {
+        Optional<ProjectDashboardDTO> dto = projectService.getDashboard(id);
+        return dto.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 }
 

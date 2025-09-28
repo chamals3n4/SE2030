@@ -1,7 +1,14 @@
 package com.se2030.backend.service;
 
+import com.se2030.backend.dto.ProjectDashboardDTO;
 import com.se2030.backend.model.Project;
+import com.se2030.backend.model.Task;
+import com.se2030.backend.model.Issue;
+import com.se2030.backend.model.Client;
+import com.se2030.backend.repository.TaskRepository;
+import com.se2030.backend.repository.IssueRepository;
 import com.se2030.backend.repository.ProjectRepository;
+import com.se2030.backend.repository.ClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,8 +23,24 @@ public class ProjectService {
 
     @Autowired
     private ProjectRepository projectRepository;
+    @Autowired
+    private TaskRepository taskRepository;
+    @Autowired
+    private IssueRepository issueRepository;
+
+    @Autowired
+    private ClientRepository clientRepository;
 
     public Project create(Project project) {
+        if (project.getClient() == null || project.getClient().getClientId() == null) {
+            throw new RuntimeException("Client ID is required");
+        }
+
+        Long clientId = project.getClient().getClientId();
+        Client client = clientRepository.findById(clientId)
+                .orElseThrow(() -> new RuntimeException("Client not found with id: " + clientId));
+
+        project.setClient(client);
         return projectRepository.save(project);
     }
 
@@ -49,10 +72,56 @@ public class ProjectService {
         projectRepository.deleteById(id);
     }
 
-    public List<Project> findByClient(Long clientId) { return projectRepository.findByClient_ClientId(clientId); }
-    public List<Project> findByStatus(String status) { return projectRepository.findByStatus(status); }
-    public List<Project> findByStartDateBetween(LocalDate start, LocalDate end) { return projectRepository.findByStartDateBetween(start, end); }
-    public List<Project> search(String q) { return projectRepository.search(q); }
+
+    public Optional<ProjectDashboardDTO> getDashboard(Long projectId) {
+        Optional<Project> projectOpt = projectRepository.findById(projectId);
+        if (projectOpt.isEmpty()) {
+            return Optional.empty();
+        }
+        Project project = projectOpt.get();
+
+        List<Task> tasks = taskRepository.findByProject_ProjectId(projectId);
+        List<Issue> issues = issueRepository.findByProject_ProjectId(projectId);
+
+        int progressAvg = (int) Math.round(tasks.stream()
+                .map(t -> t.getProgressPercent() == null ? 0 : t.getProgressPercent())
+                .mapToInt(Integer::intValue)
+                .average().orElse(0.0));
+
+        int teamSize = (int) tasks.stream()
+                .flatMap(t -> t.getProject() != null ? java.util.stream.Stream.of(t.getProject()) : java.util.stream.Stream.empty())
+                .count();
+
+        long completedTasks = tasks.stream().filter(t -> "DONE".equalsIgnoreCase(t.getStatus())).count();
+        long inProgressTasks = tasks.stream().filter(t -> "IN_PROGRESS".equalsIgnoreCase(t.getStatus())).count();
+        long pendingTasks = tasks.stream().filter(t -> !"DONE".equalsIgnoreCase(t.getStatus())).count();
+
+        long openIssues = issues.stream().filter(i -> "OPEN".equalsIgnoreCase(i.getStatus())).count();
+        long criticalIssues = issues.stream().filter(i -> "CRITICAL".equalsIgnoreCase(i.getSeverity()) && !"CLOSED".equalsIgnoreCase(i.getStatus())).count();
+
+        ProjectDashboardDTO dto = new ProjectDashboardDTO();
+        dto.setProjectId(project.getProjectId());
+        dto.setName(project.getName());
+        dto.setDescription(project.getDescription());
+        dto.setLocation(project.getLocation());
+        dto.setBudget(project.getBudget());
+        dto.setStartDate(project.getStartDate());
+        dto.setEndDate(project.getPlannedEndDate());
+        dto.setStatus(project.getStatus());
+        dto.setClientName(project.getClient() != null ? project.getClient().getName() : null);
+        dto.setTeamSize(teamSize);
+        dto.setProgress(progressAvg);
+        dto.setSpent(null); 
+        dto.setManager(null); 
+        dto.setPriority(null);
+        dto.setCompletedTasks((int) completedTasks);
+        dto.setInProgressTasks((int) inProgressTasks);
+        dto.setPendingTasks((int) pendingTasks);
+        dto.setOpenIssues((int) openIssues);
+        dto.setCriticalIssues((int) criticalIssues);
+
+        return Optional.of(dto);
+    }
 }
 
 

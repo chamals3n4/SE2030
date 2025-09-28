@@ -41,14 +41,17 @@ public class TaskService {
                 .orElseThrow(() -> new RuntimeException("Task not found with id: " + id));
     }
 
-    public void delete(Long id) { taskRepository.deleteById(id); }
+    public void delete(Long id) { 
+        // first TASKASSIGNMENT
+        List<TaskAssignment> assignments = taskAssignmentRepository.findByTask_TaskId(id);
+        if (!assignments.isEmpty()) {
+            taskAssignmentRepository.deleteAll(assignments);
+        }
+        // then TASK
+        taskRepository.deleteById(id); 
+    }
 
     public List<Task> byProject(Long projectId) { return taskRepository.findByProject_ProjectId(projectId); }
-    public List<Task> byStatus(String status) { return taskRepository.findByStatus(status); }
-    public List<Task> byPriority(String priority) { return taskRepository.findByPriority(priority); }
-    public List<Task> startBetween(LocalDate start, LocalDate end) { return taskRepository.findByStartDateBetween(start, end); }
-    public List<Task> dueBetween(LocalDate start, LocalDate end) { return taskRepository.findByDueDateBetween(start, end); }
-    public List<Task> search(String q) { return taskRepository.search(q); }
 
     public TaskAssignment createAssignment(TaskAssignment assignment) { return taskAssignmentRepository.save(assignment); }
     public List<TaskAssignment> getAllAssignments() { return taskAssignmentRepository.findAll(); }
@@ -68,10 +71,6 @@ public class TaskService {
     }
     public void deleteAssignment(Long id) { taskAssignmentRepository.deleteById(id); }
     public List<TaskAssignment> assignmentsByTask(Long taskId) { return taskAssignmentRepository.findByTask_TaskId(taskId); }
-    public List<TaskAssignment> assignmentsByEmployee(Long employeeId) { return taskAssignmentRepository.findByEmployee_EmployeeId(employeeId); }
-    public List<TaskAssignment> assignmentsByStatus(String status) { return taskAssignmentRepository.findByAssignmentStatus(status); }
-    public List<TaskAssignment> assignmentsAssignedBetween(java.time.LocalDate start, java.time.LocalDate end) { return taskAssignmentRepository.findByAssignedDateBetween(start, end); }
-    public List<TaskAssignment> assignmentsDueBetween(java.time.LocalDate start, java.time.LocalDate end) { return taskAssignmentRepository.findByDueDateBetween(start, end); }
 }
 
 

@@ -7,6 +7,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 public class FilterChainConfiguration {
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
@@ -14,7 +15,13 @@ public class FilterChainConfiguration {
             .and()
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(authz -> authz
-                .requestMatchers("/api/public/**").permitAll()
+                .requestMatchers(
+                    "/api/public/**",         
+                    "/v3/api-docs/**",        
+                    "/v3/api-docs.yaml",      
+                    "/swagger-ui/**",          
+                    "/swagger-ui.html"       
+                ).permitAll()
                 .anyRequest().authenticated()
             )
             .oauth2ResourceServer()

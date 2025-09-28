@@ -63,9 +63,4 @@ public class ClientController {
         }
     }
 
-    @GetMapping("/search")
-    public ResponseEntity<List<Client>> searchClients(@RequestParam("q") String search) {
-        List<Client> clients = clientService.searchClients(search);
-        return new ResponseEntity<>(clients, HttpStatus.OK);
-    }
 }

@@ -53,35 +53,6 @@ public class EquipmentController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @GetMapping("/by-type/{type}")
-    public ResponseEntity<List<Equipment>> byType(@PathVariable("type") String type) {
-        return new ResponseEntity<>(resourceService.equipmentByType(type), HttpStatus.OK);
-    }
-
-    @GetMapping("/by-supplier/{supplierId}")
-    public ResponseEntity<List<Equipment>> bySupplier(@PathVariable("supplierId") Long supplierId) {
-        return new ResponseEntity<>(resourceService.getEquipmentBySupplier(supplierId), HttpStatus.OK);
-    }
-
-    @PutMapping("/{id}/archive")
-    public ResponseEntity<Equipment> archive(@PathVariable("id") Long id) {
-        try {
-            Equipment archived = resourceService.archiveEquipment(id);
-            return new ResponseEntity<>(archived, HttpStatus.OK);
-        } catch (RuntimeException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
-
-    @DeleteMapping("/{id}/force")
-    public ResponseEntity<Void> forceDelete(@PathVariable("id") Long id) {
-        try {
-            resourceService.forceDeleteEquipment(id);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } catch (RuntimeException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
 }
 
 

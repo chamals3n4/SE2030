@@ -1,6 +1,7 @@
 package com.se2030.backend.service;
 
 import com.se2030.backend.model.Supplier;
+import com.se2030.backend.model.SupplierStore;
 import com.se2030.backend.repository.SupplierRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,33 +17,16 @@ public class SupplierService {
 	@Autowired
 	private SupplierRepository supplierRepository;
 
-	public Supplier create(Supplier supplier) {
-		if (supplier.getEmail() != null && supplierRepository.findByEmail(supplier.getEmail()).isPresent()) {
-			throw new RuntimeException("Supplier with email " + supplier.getEmail() + " already exists");
-		}
-		return supplierRepository.save(supplier);
+
+	public List<SupplierStore> getAllStores() {
+		return supplierRepository.findAllSupplierStores();
 	}
 
-	public List<Supplier> getAll() { return supplierRepository.findAll(); }
-	public Optional<Supplier> getById(Long id) { return supplierRepository.findById(id); }
-
-	public Supplier update(Long id, Supplier updated) {
-		return supplierRepository.findById(id)
-				.map(existing -> {
-					existing.setCompanyName(updated.getCompanyName());
-					existing.setContactName(updated.getContactName());
-					existing.setEmail(updated.getEmail());
-					existing.setPhone(updated.getPhone());
-					existing.setAddress(updated.getAddress());
-					return supplierRepository.save(existing);
-				})
-				.orElseThrow(() -> new RuntimeException("Supplier not found with id: " + id));
+	public Optional<SupplierStore> getStoreById(Long id) {
+		// This method is not used, so we'll return empty
+		return Optional.empty();
 	}
 
-	public void delete(Long id) { supplierRepository.deleteById(id); }
-
-	public List<Supplier> search(String q) { return supplierRepository.search(q); }
-	public List<Supplier> byName(String name) { return supplierRepository.findByCompanyNameContainingIgnoreCase(name); }
 }
 
 

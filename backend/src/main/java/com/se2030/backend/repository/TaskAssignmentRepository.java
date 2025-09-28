@@ -10,10 +10,6 @@ import java.util.List;
 @Repository
 public interface TaskAssignmentRepository extends JpaRepository<TaskAssignment, Long> {
     List<TaskAssignment> findByTask_TaskId(Long taskId);
-    List<TaskAssignment> findByEmployee_EmployeeId(Long employeeId);
-    List<TaskAssignment> findByAssignmentStatus(String status);
-    List<TaskAssignment> findByAssignedDateBetween(LocalDate start, LocalDate end);
-    List<TaskAssignment> findByDueDateBetween(LocalDate start, LocalDate end);
 }
 
 

@@ -65,49 +65,4 @@ public class EmployeeController {
         }
     }
 
-    @GetMapping("/status/{status}")
-    public ResponseEntity<List<Employee>> getEmployeesByStatus(@PathVariable("status") String status) {
-        List<Employee> employees = employeeService.getEmployeesByStatus(status);
-        return new ResponseEntity<>(employees, HttpStatus.OK);
-    }
-
-    @GetMapping("/active")
-    public ResponseEntity<List<Employee>> getActiveEmployees() {
-        List<Employee> employees = employeeService.getActiveEmployees();
-        return new ResponseEntity<>(employees, HttpStatus.OK);
-    }
-
-    @GetMapping("/role/{role}")
-    public ResponseEntity<List<Employee>> getEmployeesByRole(@PathVariable("role") String role) {
-        List<Employee> employees = employeeService.getEmployeesByRole(role);
-        return new ResponseEntity<>(employees, HttpStatus.OK);
-    }
-
-    @GetMapping("/search")
-    public ResponseEntity<List<Employee>> searchEmployees(@RequestParam("q") String search) {
-        List<Employee> employees = employeeService.searchEmployees(search);
-        return new ResponseEntity<>(employees, HttpStatus.OK);
-    }
-
-    @PostMapping("/{id}/activate")
-    public ResponseEntity<Employee> activate(@PathVariable("id") Long id) {
-        return employeeService.getEmployeeById(id)
-                .map(e -> {
-                    e.setStatus("ACTIVE");
-                    Employee updated = employeeService.updateEmployee(id, e);
-                    return new ResponseEntity<>(updated, HttpStatus.OK);
-                })
-                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
-    }
-
-    @PostMapping("/{id}/deactivate")
-    public ResponseEntity<Employee> deactivate(@PathVariable("id") Long id) {
-        return employeeService.getEmployeeById(id)
-                .map(e -> {
-                    e.setStatus("INACTIVE");
-                    Employee updated = employeeService.updateEmployee(id, e);
-                    return new ResponseEntity<>(updated, HttpStatus.OK);
-                })
-                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
-    }
 }

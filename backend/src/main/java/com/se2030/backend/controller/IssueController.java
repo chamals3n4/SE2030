@@ -69,69 +69,28 @@ public class IssueController {
         return new ResponseEntity<>(issueService.byProject(projectId), HttpStatus.OK);
     }
 
-    @GetMapping("/status/{status}")
-    public ResponseEntity<List<Issue>> byStatus(@PathVariable("status") String status) {
-        return new ResponseEntity<>(issueService.byStatus(status), HttpStatus.OK);
-    }
-
-    @GetMapping("/severity/{severity}")
-    public ResponseEntity<List<Issue>> bySeverity(@PathVariable("severity") String severity) {
-        return new ResponseEntity<>(issueService.bySeverity(severity), HttpStatus.OK);
-    }
-
-    @GetMapping("/reported-between")
-    public ResponseEntity<List<Issue>> reportedBetween(
-            @RequestParam("start") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
-            @RequestParam("end") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
-        return new ResponseEntity<>(issueService.reportedBetween(start, end), HttpStatus.OK);
-    }
-
-    @GetMapping("/resolved-between")
-    public ResponseEntity<List<Issue>> resolvedBetween(
-            @RequestParam("start") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
-            @RequestParam("end") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
-        return new ResponseEntity<>(issueService.resolvedBetween(start, end), HttpStatus.OK);
-    }
-
-    @GetMapping("/search")
-    public ResponseEntity<List<Issue>> search(@RequestParam("q") String q) {
-        return new ResponseEntity<>(issueService.search(q), HttpStatus.OK);
-    }
-
     @PostMapping("/{id}/assign")
-    public ResponseEntity<Issue> assign(
-            @PathVariable("id") Long id,
-            @RequestParam Long employeeId) {
+    public ResponseEntity<Issue> assignIssue(@PathVariable("id") Long issueId, @RequestParam Long employeeId) {
         try {
-            Issue issue = issueService.getById(id).orElseThrow();
-            com.se2030.backend.model.Employee emp = new com.se2030.backend.model.Employee();
-            emp.setEmployeeId(employeeId);
-            issue.setAssignedTo(emp);
-            Issue updated = issueService.update(id, issue);
-            return new ResponseEntity<>(updated, HttpStatus.OK);
+            Issue updatedIssue = issueService.assignIssue(issueId, employeeId);
+            return new ResponseEntity<>(updatedIssue, HttpStatus.OK);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
     @PostMapping("/{id}/close")
-    public ResponseEntity<Issue> close(
-            @PathVariable("id") Long id,
-            @RequestParam Long employeeId,
-            @RequestParam(required = false) String notes) {
+    public ResponseEntity<Issue> closeIssue(@PathVariable("id") Long issueId, 
+                                          @RequestParam Long employeeId, 
+                                          @RequestParam(required = false) String notes) {
         try {
-            Issue issue = issueService.getById(id).orElseThrow();
-            com.se2030.backend.model.Employee emp = new com.se2030.backend.model.Employee();
-            emp.setEmployeeId(employeeId);
-            issue.setClosedBy(emp);
-            issue.setResolutionNotes(notes);
-            issue.setStatus("CLOSED");
-            Issue updated = issueService.update(id, issue);
-            return new ResponseEntity<>(updated, HttpStatus.OK);
+            Issue updatedIssue = issueService.closeIssue(issueId, employeeId, notes);
+            return new ResponseEntity<>(updatedIssue, HttpStatus.OK);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
+
 }
 
 
