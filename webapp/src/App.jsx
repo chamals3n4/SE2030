@@ -25,10 +25,10 @@ import Hero from "./pages/Hero";
 import { ThemeProvider } from "@/components/theme-provider";
 
 const config = {
-  signInRedirectURL: "http://localhost:5173",
-  signOutRedirectURL: "http://localhost:5173",
-  clientID: "Spm02GPGHLMTNq4OP_kl6OXeAzQa",
-  baseUrl: "https://api.asgardeo.io/t/s3n4",
+  signInRedirectURL: import.meta.env.VITE_SIGN_IN_REDIRECT_URL || "http://localhost:5173",
+  signOutRedirectURL: import.meta.env.VITE_SIGN_OUT_REDIRECT_URL || "http://localhost:5173",
+  clientID: import.meta.env.VITE_ASGARDEO_CLIENT_ID || "Spm02GPGHLMTNq4OP_kl6OXeAzQa",
+  baseUrl: import.meta.env.VITE_ASGARDEO_BASE_URL || "https://api.asgardeo.io/t/s3n4",
   scope: ["openid", "profile"],
 };
 
