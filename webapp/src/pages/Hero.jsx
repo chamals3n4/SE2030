@@ -1,6 +1,7 @@
 import { useAuthContext } from "@asgardeo/auth-react";
 import { Button } from "../components/ui/button";
 import { Link } from "react-router-dom";
+import { ModeToggle } from "@/components/mode-toggle";
 export default function Hero() {
   const { state, signIn, signOut } = useAuthContext();
   return (
@@ -47,6 +48,10 @@ export default function Hero() {
             </div>
           </div>
         )}
+      </div>
+      {/* Theme toggle - bottom right */}
+      <div className="fixed bottom-4 right-4 z-50">
+        <ModeToggle />
       </div>
     </div>
   );

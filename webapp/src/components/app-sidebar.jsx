@@ -31,7 +31,7 @@ function buildNav(locationPathname) {
 
     return [
         { title: "Overview", url: withPid("/overview"), icon: FolderOpen, dynamic: true, requiresProject: true },
-        { title: "Workforce", url: withPid("/workforce"), icon: Users, dynamic: true, requiresProject: true },
+        // Workforce moved under Construction; removing from per-project nav
         { title: "Tasks", url: withPid("/tasks"), icon: CheckSquare, dynamic: true, requiresProject: true },
         { title: "Issues", url: withPid("/issues"), icon: AlertTriangle, dynamic: true, requiresProject: true },
         { title: "Finance", url: withPid("/finance"), icon: Banknote, dynamic: true, requiresProject: true },

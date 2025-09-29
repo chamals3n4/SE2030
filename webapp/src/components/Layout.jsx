@@ -14,8 +14,14 @@ import {
     SidebarProvider,
     SidebarTrigger,
 } from "@/components/ui/sidebar"
+import { ModeToggle } from "@/components/mode-toggle"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { useAuthContext } from "@asgardeo/auth-react"
 
 export default function Layout({ children }) {
+    const { state } = useAuthContext()
+    const username = state?.username || "User"
+    const initials = username.slice(0, 2).toUpperCase()
     return (
         <SidebarProvider>
             <AppSidebar />
@@ -39,6 +45,12 @@ export default function Layout({ children }) {
                             </BreadcrumbItem>
                         </BreadcrumbList>
                     </Breadcrumb>
+                    <div className="ml-auto flex items-center gap-2">
+                        <ModeToggle />
+                        <Avatar className="size-9">
+                            <AvatarFallback className="text-sm">{initials}</AvatarFallback>
+                        </Avatar>
+                    </div>
                 </header>
                 <main className="flex flex-1 flex-col">
                     {children ?? <Outlet />}

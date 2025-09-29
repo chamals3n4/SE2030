@@ -56,10 +56,12 @@ public class EmployeeController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<HttpStatus> deleteEmployee(@PathVariable("id") Long employeeId) {
+    public ResponseEntity<?> deleteEmployee(@PathVariable("id") Long employeeId) {
         try {
             employeeService.deleteEmployee(employeeId);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (IllegalStateException ex) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Cannot delete employee: linked records exist.");
         } catch (RuntimeException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }

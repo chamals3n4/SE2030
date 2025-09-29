@@ -91,7 +91,6 @@ public class TaskController {
         taskRef.setTaskId(taskId);
         ta.setTask(taskRef);
         
-        // Create a proper Employee reference with the ID
         com.se2030.backend.model.Employee empRef = new com.se2030.backend.model.Employee();
         empRef.setEmployeeId(employeeId);
         

@@ -1,8 +1,6 @@
 import * as React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { useCart } from '@/context/CartContext';
-import CartDrawer from '@/components/cart/CartDrawer';
 
 function NavLink({ to, children }) {
     const location = useLocation();
@@ -16,7 +14,6 @@ function NavLink({ to, children }) {
 }
 
 export default function ConstructionLayout({ children }) {
-    const { items, setIsOpen } = useCart();
     return (
         <div className="min-h-screen">
             <header className="border-b bg-white">
@@ -25,16 +22,15 @@ export default function ConstructionLayout({ children }) {
                     <nav className="flex items-center gap-1">
                         <NavLink to="/construction">Home</NavLink>
                         <NavLink to="/projects">Projects</NavLink>
-                        <NavLink to="/marketplace">Buy Stuff</NavLink>
-                        <NavLink to="/stock">Our Store</NavLink>
+                        <NavLink to="/construction/employees">Employees</NavLink>
+                        <NavLink to="/stock">Company Stock</NavLink>
+                        <NavLink to="/construction/marketplace">Marketplace</NavLink>
                     </nav>
                     <div className="hidden md:flex items-center gap-2">
                         <Link to="/projects/create">
                             <Button size="sm">New Project</Button>
                         </Link>
-                        <Button variant="outline" size="sm" onClick={() => setIsOpen(true)}>
-                            Cart {items.length > 0 ? `(${items.reduce((s, i) => s + i.quantity, 0)})` : ''}
-                        </Button>
+
                         <Link to="/">
                             <Button variant="outline" size="sm">Back to Portal</Button>
                         </Link>
@@ -44,7 +40,7 @@ export default function ConstructionLayout({ children }) {
             <main className="mx-auto max-w-6xl px-4 py-6">
                 {children}
             </main>
-            <CartDrawer />
+
         </div>
     );
 }

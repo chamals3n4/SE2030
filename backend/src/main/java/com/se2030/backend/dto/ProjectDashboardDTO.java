@@ -16,9 +16,9 @@ public class ProjectDashboardDTO {
 
     private Integer teamSize;
     private Integer progress;
-    private BigDecimal spent; // optional
-    private String manager; // optional
-    private String priority; // optional
+    private BigDecimal spent;
+    private String manager;
+    private String priority; 
 
     private Integer completedTasks;
     private Integer inProgressTasks;

@@ -3,6 +3,7 @@ package com.se2030.backend.service;
 import com.se2030.backend.model.Employee;
 import com.se2030.backend.repository.EmployeeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,8 +49,11 @@ public class EmployeeService {
     public void deleteEmployee(Long employeeId) {
         Employee employee = employeeRepository.findById(employeeId)
                 .orElseThrow(() -> new RuntimeException("Employee not found with id: " + employeeId));
-        employee.setStatus("INACTIVE");
-        employeeRepository.save(employee);
+        try {
+            employeeRepository.delete(employee);
+        } catch (DataIntegrityViolationException ex) {
+            throw new IllegalStateException("Cannot delete employee. References exist (tasks/issues/assignments).", ex);
+        }
     }
 
 }

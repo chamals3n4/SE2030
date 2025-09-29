@@ -71,7 +71,7 @@ export default function Stock() {
         const matchesSearch = item.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             item.description?.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesStatus = statusFilter === 'all' || item.status === statusFilter;
-        const matchesType = typeFilter === 'all' || item.type === typeFilter;
+        const matchesType = typeFilter === 'all' || (item.resourceType || '').toLowerCase() === typeFilter;
 
         return matchesSearch && matchesStatus && matchesType;
     });
@@ -82,9 +82,11 @@ export default function Stock() {
         const lowStockItems = stockItems.filter(item =>
             item.type === 'material' && item.currentStock <= (item.reorderLevel || 10)
         ).length;
-        const totalValue = stockItems.reduce((sum, item) =>
-            sum + (item.price * (item.currentStock || 0)), 0
-        );
+        const totalValue = stockItems.reduce((sum, item) => {
+            const qty = item.currentQuantity || 0;
+            const cost = Number(item.unitCost || 0);
+            return sum + (cost * qty);
+        }, 0);
 
         return [
             {
@@ -209,7 +211,7 @@ export default function Stock() {
                             </div>
                         ) : (
                             filteredStockItems.map((item) => (
-                                <Card key={item.resourceId} className="shadow-none hover:shadow-md transition-shadow">
+                                <Card key={item.stockId || item.resourceId} className="shadow-none hover:shadow-md transition-shadow">
                                     <CardHeader className="pb-3">
                                         <div className="flex justify-between items-start">
                                             <CardTitle className="text-lg">{item.name}</CardTitle>
@@ -225,23 +227,15 @@ export default function Stock() {
                                             <div className="space-y-2">
                                                 <div className="flex justify-between text-sm">
                                                     <span className="text-gray-500">Type:</span>
-                                                    <span className="font-medium">
-                                                        {item.type === 'material' ? 'Material' : 'Equipment'}
-                                                    </span>
+                                                    <span className="font-medium">{(item.resourceType || '').toUpperCase()}</span>
                                                 </div>
-                                                {item.type === 'material' && (
-                                                    <div className="flex justify-between text-sm">
-                                                        <span className="text-gray-500">Stock:</span>
-                                                        <span className="font-medium">
-                                                            {item.currentStock} {item.unitOfMeasure}
-                                                        </span>
-                                                    </div>
-                                                )}
+                                                <div className="flex justify-between text-sm">
+                                                    <span className="text-gray-500">Stock:</span>
+                                                    <span className="font-medium">{item.currentQuantity} {item.unitOfMeasure || ''}</span>
+                                                </div>
                                                 <div className="flex justify-between text-sm">
                                                     <span className="text-gray-500">Value:</span>
-                                                    <span className="font-medium text-green-600">
-                                                        ${(item.price * (item.currentStock || 0)).toFixed(2)}
-                                                    </span>
+                                                    <span className="font-medium text-green-600">${Number((item.unitCost || 0) * (item.currentQuantity || 0)).toFixed(2)}</span>
                                                 </div>
                                             </div>
 
