@@ -1,0 +1,48 @@
+import * as React from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+
+function NavLink({ to, children }) {
+    const location = useLocation();
+    const isActive = location.pathname === to;
+    return (
+        <Link to={to} className={`px-3 py-2 rounded-md text-sm font-medium ${isActive ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-100'
+            }`}>
+            {children}
+        </Link>
+    );
+}
+
+export default function ConstructionLayout({ children }) {
+    return (
+        <div className="min-h-screen">
+            <header className="border-b bg-white">
+                <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
+                    <div className="font-semibold">Construction Management</div>
+                    <nav className="flex items-center gap-1">
+                        <NavLink to="/construction">Home</NavLink>
+                        <NavLink to="/projects">Projects</NavLink>
+                        <NavLink to="/construction/employees">Employees</NavLink>
+                        <NavLink to="/stock">Company Stock</NavLink>
+                        <NavLink to="/construction/marketplace">Marketplace</NavLink>
+                    </nav>
+                    <div className="hidden md:flex items-center gap-2">
+                        <Link to="/projects/create">
+                            <Button size="sm">New Project</Button>
+                        </Link>
+
+                        <Link to="/">
+                            <Button variant="outline" size="sm">Back to Portal</Button>
+                        </Link>
+                    </div>
+                </div>
+            </header>
+            <main className="mx-auto max-w-6xl px-4 py-6">
+                {children}
+            </main>
+
+        </div>
+    );
+}
+
+

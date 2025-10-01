@@ -53,10 +53,6 @@ public class MaterialController {
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
-	@GetMapping("/by-unit/{uom}")
-	public ResponseEntity<List<Material>> byUnit(@PathVariable("uom") String uom) {
-		return new ResponseEntity<>(resourceService.materialsByUnit(uom), HttpStatus.OK);
-	}
 }
 
 

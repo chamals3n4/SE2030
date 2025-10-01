@@ -14,21 +14,4 @@ import java.util.Optional;
 public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
 
-    Optional<Employee> findByNic(String nic);
-    List<Employee> findByStatus(String status);
-    List<Employee> findByRole(String role);
-    List<Employee> findByHireDateBetween(LocalDate startDate, LocalDate endDate);
-    List<Employee> findByNameContainingIgnoreCase(String name);
-
-    @Query("SELECT e FROM Employee e WHERE e.status = 'ACTIVE'")
-    List<Employee> findActiveEmployees();
-
-    @Query("SELECT e FROM Employee e WHERE " +
-            "LOWER(e.name) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
-            "LOWER(e.role) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
-            "e.nic LIKE CONCAT('%', :search, '%')")
-    List<Employee> searchEmployees(@Param("search") String search);
-
-    @Query("SELECT COUNT(e) FROM Employee e WHERE e.role = :role AND e.status = 'ACTIVE'")
-    Long countByRoleAndActive(@Param("role") String role);
 }

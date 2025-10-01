@@ -28,38 +28,42 @@ public abstract class Resource {
     @Column(name = "status")
     private String status; // ACTIVE, INACTIVE, MAINTENANCE
 
-    @Column(name = "created_date")
-    private LocalDateTime createdDate;
 
-    @Column(name = "updated_date")
-    private LocalDateTime updatedDate;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "preferred_supplier_id")
+    private Supplier preferredSupplier;
+
+    @Column(name = "reorder_level")
+    private Integer reorderLevel; // Minimum stock level before reordering
+
+    @Column(name = "reorder_quantity")
+    private Integer reorderQuantity; // Standard quantity to reorder
 
     public Resource() {
-        this.createdDate = LocalDateTime.now();
-        this.updatedDate = LocalDateTime.now();
         this.status = "ACTIVE";
     }
 
     public Long getResourceId() { return resourceId; }
-    public void setResourceId(Long resourceId) { this.resourceId = resourceId; }
 
     public String getName() { return name; }
-    public void setName(String name) { this.name = name; this.updatedDate = LocalDateTime.now(); }
+    public void setName(String name) { this.name = name; }
 
     public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; this.updatedDate = LocalDateTime.now(); }
+    public void setDescription(String description) { this.description = description; }
 
     public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; this.updatedDate = LocalDateTime.now(); }
+    public void setStatus(String status) { this.status = status; }
 
-    public LocalDateTime getCreatedDate() { return createdDate; }
-    public void setCreatedDate(LocalDateTime createdDate) { this.createdDate = createdDate; }
 
-    public LocalDateTime getUpdatedDate() { return updatedDate; }
-    public void setUpdatedDate(LocalDateTime updatedDate) { this.updatedDate = updatedDate; }
+    public Supplier getPreferredSupplier() { return preferredSupplier; }
+    public void setPreferredSupplier(Supplier preferredSupplier) { this.preferredSupplier = preferredSupplier; }
 
-    @PreUpdate
-    public void preUpdate() { this.updatedDate = LocalDateTime.now(); }
+    public Integer getReorderLevel() { return reorderLevel; }
+    public void setReorderLevel(Integer reorderLevel) { this.reorderLevel = reorderLevel; }
+
+    public Integer getReorderQuantity() { return reorderQuantity; }
+    public void setReorderQuantity(Integer reorderQuantity) { this.reorderQuantity = reorderQuantity; }
+
 }
 
 

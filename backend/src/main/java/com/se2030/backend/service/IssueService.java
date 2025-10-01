@@ -40,11 +40,30 @@ public class IssueService {
     public void delete(Long id) { issueRepository.deleteById(id); }
 
     public List<Issue> byProject(Long projectId) { return issueRepository.findByProject_ProjectId(projectId); }
-    public List<Issue> byStatus(String status) { return issueRepository.findByStatus(status); }
-    public List<Issue> bySeverity(String severity) { return issueRepository.findBySeverity(severity); }
-    public List<Issue> reportedBetween(LocalDate start, LocalDate end) { return issueRepository.findByReportedDateBetween(start, end); }
-    public List<Issue> resolvedBetween(LocalDate start, LocalDate end) { return issueRepository.findByResolvedDateBetween(start, end); }
-    public List<Issue> search(String q) { return issueRepository.search(q); }
+
+    public Issue assignIssue(Long issueId, Long employeeId) {
+        return issueRepository.findById(issueId)
+                .map(issue -> {
+                    com.se2030.backend.model.Employee employee = new com.se2030.backend.model.Employee();
+                    employee.setEmployeeId(employeeId);
+                    issue.setAssignedTo(employee);
+                    return issueRepository.save(issue);
+                })
+                .orElseThrow(() -> new RuntimeException("Issue not found with id: " + issueId));
+    }
+
+    public Issue closeIssue(Long issueId, Long employeeId, String notes) {
+        return issueRepository.findById(issueId)
+                .map(issue -> {
+                    issue.setStatus("CLOSED");
+                    issue.setResolvedDate(java.time.LocalDate.now());
+                    if (notes != null && !notes.trim().isEmpty()) {
+                        issue.setResolutionNotes(notes);
+                    }
+                    return issueRepository.save(issue);
+                })
+                .orElseThrow(() -> new RuntimeException("Issue not found with id: " + issueId));
+    }
 }
 
 

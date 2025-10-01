@@ -11,13 +11,6 @@ import java.util.List;
 
 @Repository
 public interface ProjectRepository extends JpaRepository<Project, Long> {
-    List<Project> findByClient_ClientId(Long clientId);
-    List<Project> findByStatus(String status);
-    List<Project> findByStartDateBetween(LocalDate start, LocalDate end);
-    List<Project> findByNameContainingIgnoreCase(String name);
-
-    @Query("SELECT p FROM Project p WHERE LOWER(p.name) LIKE LOWER(CONCAT('%', :q, '%')) OR LOWER(p.description) LIKE LOWER(CONCAT('%', :q, '%'))")
-    List<Project> search(@Param("q") String q);
 }
 
 

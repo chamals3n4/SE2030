@@ -53,10 +53,6 @@ public class EquipmentController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @GetMapping("/by-type/{type}")
-    public ResponseEntity<List<Equipment>> byType(@PathVariable("type") String type) {
-        return new ResponseEntity<>(resourceService.equipmentByType(type), HttpStatus.OK);
-    }
 }
 
 

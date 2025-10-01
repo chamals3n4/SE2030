@@ -17,9 +17,6 @@ public class ClientService {
     private ClientRepository clientRepository;
 
     public Client createClient(Client client) {
-        if (client.getEmail() != null && clientRepository.findByEmail(client.getEmail()).isPresent()) {
-            throw new RuntimeException("Client with email " + client.getEmail() + " already exists");
-        }
         return clientRepository.save(client);
     }
 
@@ -31,9 +28,6 @@ public class ClientService {
         return clientRepository.findById(clientId);
     }
 
-    public Optional<Client> getClientByEmail(String email) {
-        return clientRepository.findByEmail(email);
-    }
 
     public Client updateClient(Long clientId, Client updatedClient) {
         return clientRepository.findById(clientId)
@@ -53,7 +47,4 @@ public class ClientService {
         clientRepository.deleteById(clientId);
     }
 
-    public List<Client> searchClients(String search) {
-        return clientRepository.searchByNameOrEmail(search);
-    }
 }

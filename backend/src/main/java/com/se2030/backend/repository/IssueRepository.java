@@ -12,14 +12,6 @@ import java.util.List;
 @Repository
 public interface IssueRepository extends JpaRepository<Issue, Long> {
     List<Issue> findByProject_ProjectId(Long projectId);
-    List<Issue> findByStatus(String status);
-    List<Issue> findBySeverity(String severity);
-    List<Issue> findByReportedDateBetween(LocalDate start, LocalDate end);
-    List<Issue> findByResolvedDateBetween(LocalDate start, LocalDate end);
-    List<Issue> findByTitleContainingIgnoreCase(String title);
-
-    @Query("SELECT i FROM Issue i WHERE LOWER(i.title) LIKE LOWER(CONCAT('%', :q, '%')) OR LOWER(i.description) LIKE LOWER(CONCAT('%', :q, '%'))")
-    List<Issue> search(@Param("q") String q);
 }
 
 

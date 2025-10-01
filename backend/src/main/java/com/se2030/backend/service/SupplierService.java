@@ -16,33 +16,23 @@ public class SupplierService {
 	@Autowired
 	private SupplierRepository supplierRepository;
 
-	public Supplier create(Supplier supplier) {
-		if (supplier.getEmail() != null && supplierRepository.findByEmail(supplier.getEmail()).isPresent()) {
-			throw new RuntimeException("Supplier with email " + supplier.getEmail() + " already exists");
-		}
-		return supplierRepository.save(supplier);
-	}
 
+	public Supplier create(Supplier supplier) { return supplierRepository.save(supplier); }
 	public List<Supplier> getAll() { return supplierRepository.findAll(); }
 	public Optional<Supplier> getById(Long id) { return supplierRepository.findById(id); }
-
-	public Supplier update(Long id, Supplier updated) {
-		return supplierRepository.findById(id)
-				.map(existing -> {
-					existing.setCompanyName(updated.getCompanyName());
-					existing.setContactName(updated.getContactName());
-					existing.setEmail(updated.getEmail());
-					existing.setPhone(updated.getPhone());
-					existing.setAddress(updated.getAddress());
-					return supplierRepository.save(existing);
-				})
-				.orElseThrow(() -> new RuntimeException("Supplier not found with id: " + id));
-	}
-
 	public void delete(Long id) { supplierRepository.deleteById(id); }
+	public Supplier update(Long id, Supplier data) {
+		return supplierRepository.findById(id).map(s -> {
+			s.setCompanyName(data.getCompanyName());
+			s.setContactName(data.getContactName());
+			s.setEmail(data.getEmail());
+			s.setPhone(data.getPhone());
+			s.setAddress(data.getAddress());
+			return supplierRepository.save(s);
+		}).orElseThrow(() -> new RuntimeException("Supplier not found"));
+	}
+	public List<Supplier> searchByName(String name) { return supplierRepository.findByCompanyNameContainingIgnoreCase(name); }
 
-	public List<Supplier> search(String q) { return supplierRepository.search(q); }
-	public List<Supplier> byName(String name) { return supplierRepository.findByCompanyNameContainingIgnoreCase(name); }
 }
 
 
