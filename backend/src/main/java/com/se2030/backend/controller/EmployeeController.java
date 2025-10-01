@@ -39,6 +39,7 @@ public class EmployeeController {
         return new ResponseEntity<>(employees, HttpStatus.OK);
     }
 
+    //View employee by ID
     @GetMapping("/{id}")
     public ResponseEntity<Employee> getEmployeeById(@PathVariable("id") Long employeeId) {
         Optional<Employee> employee = employeeService.getEmployeeById(employeeId);
@@ -75,12 +76,14 @@ public class EmployeeController {
         return new ResponseEntity<>(employees, HttpStatus.OK);
     }
 
+    //Gets all active employees
     @GetMapping("/active")
     public ResponseEntity<List<Employee>> getActiveEmployees() {
         List<Employee> employees = employeeService.getActiveEmployees();
         return new ResponseEntity<>(employees, HttpStatus.OK);
     }
 
+    //Gets employees as for their job roles
     @GetMapping("/role/{role}")
     public ResponseEntity<List<Employee>> getEmployeesByRole(@PathVariable("role") String role) {
         List<Employee> employees = employeeService.getEmployeesByRole(role);
