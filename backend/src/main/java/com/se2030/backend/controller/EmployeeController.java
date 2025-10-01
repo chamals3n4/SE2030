@@ -21,6 +21,7 @@ public class EmployeeController {
     @Autowired
     private EmployeeService employeeService;
 
+    //Create new employee profile
     @PostMapping
     public ResponseEntity<Employee> createEmployee(@Valid @RequestBody Employee employee) {
         try {
@@ -31,6 +32,7 @@ public class EmployeeController {
         }
     }
 
+    //View all profiles
     @GetMapping
     public ResponseEntity<List<Employee>> getAllEmployees() {
         List<Employee> employees = employeeService.getAllEmployees();
@@ -44,6 +46,7 @@ public class EmployeeController {
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
+    //Update profiles
     @PutMapping("/{id}")
     public ResponseEntity<Employee> updateEmployee(@PathVariable("id") Long employeeId,
                                                    @Valid @RequestBody Employee employee) {
@@ -55,6 +58,7 @@ public class EmployeeController {
         }
     }
 
+    //Delete employee profiles
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteEmployee(@PathVariable("id") Long employeeId) {
         try {
