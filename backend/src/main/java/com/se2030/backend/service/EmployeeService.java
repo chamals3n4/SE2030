@@ -17,6 +17,7 @@ public class EmployeeService {
     @Autowired
     private EmployeeRepository employeeRepository;
 
+    //New employee
     public Employee createEmployee(Employee employee) {
         if (employeeRepository.findByNic(employee.getNic()).isPresent()) {
             throw new RuntimeException("Employee with NIC " + employee.getNic() + " already exists");
