@@ -1,6 +1,8 @@
 package com.se2030.backend.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
+import java.math.BigDecimal;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 
@@ -19,6 +21,10 @@ public class Equipment extends Resource {
     @Column(name = "warranty_expiry")
     private LocalDate warrantyExpiry;
 
+    @DecimalMin(value = "0.0", inclusive = true)
+    @Column(name = "price", precision = 18, scale = 2)
+    private BigDecimal price;
+
     public String getModel() { return model; }
     public void setModel(String model) { this.model = model; }
 
@@ -27,6 +33,9 @@ public class Equipment extends Resource {
 
     public LocalDate getWarrantyExpiry() { return warrantyExpiry; }
     public void setWarrantyExpiry(LocalDate warrantyExpiry) { this.warrantyExpiry = warrantyExpiry; }
+
+    public BigDecimal getPrice() { return price; }
+    public void setPrice(BigDecimal price) { this.price = price; }
 }
 
 

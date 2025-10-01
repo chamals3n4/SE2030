@@ -3,6 +3,7 @@ package com.se2030.backend.service;
 import com.se2030.backend.model.Employee;
 import com.se2030.backend.repository.EmployeeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,9 +20,6 @@ public class EmployeeService {
 
     //New employee
     public Employee createEmployee(Employee employee) {
-        if (employeeRepository.findByNic(employee.getNic()).isPresent()) {
-            throw new RuntimeException("Employee with NIC " + employee.getNic() + " already exists");
-        }
         return employeeRepository.save(employee);
     }
 
@@ -33,19 +31,17 @@ public class EmployeeService {
         return employeeRepository.findById(employeeId);
     }
 
-    public Optional<Employee> getEmployeeByNic(String nic) {
-        return employeeRepository.findByNic(nic);
-    }
 
     public Employee updateEmployee(Long employeeId, Employee updatedEmployee) {
         return employeeRepository.findById(employeeId)
                 .map(employee -> {
-                    employee.setFirstName(updatedEmployee.getFirstName());
-                    employee.setLastName(updatedEmployee.getLastName());
+                    employee.setName(updatedEmployee.getName());
                     employee.setRole(updatedEmployee.getRole());
                     employee.setStatus(updatedEmployee.getStatus());
                     employee.setPhone(updatedEmployee.getPhone());
                     employee.setAddress(updatedEmployee.getAddress());
+                    employee.setNic(updatedEmployee.getNic());
+                    employee.setHireDate(updatedEmployee.getHireDate());
                     return employeeRepository.save(employee);
                 })
                 .orElseThrow(() -> new RuntimeException("Employee not found with id: " + employeeId));
@@ -54,31 +50,11 @@ public class EmployeeService {
     public void deleteEmployee(Long employeeId) {
         Employee employee = employeeRepository.findById(employeeId)
                 .orElseThrow(() -> new RuntimeException("Employee not found with id: " + employeeId));
-        employee.setStatus("INACTIVE");
-        employeeRepository.save(employee);
+        try {
+            employeeRepository.delete(employee);
+        } catch (DataIntegrityViolationException ex) {
+            throw new IllegalStateException("Cannot delete employee. References exist (tasks/issues/assignments).", ex);
+        }
     }
 
-    public List<Employee> getEmployeesByStatus(String status) {
-        return employeeRepository.findByStatus(status);
-    }
-
-    public List<Employee> getActiveEmployees() {
-        return employeeRepository.findActiveEmployees();
-    }
-
-    public List<Employee> getEmployeesByRole(String role) {
-        return employeeRepository.findByRole(role);
-    }
-
-    public List<Employee> searchEmployees(String search) {
-        return employeeRepository.searchEmployees(search);
-    }
-
-    public List<Employee> getEmployeesHiredBetween(LocalDate startDate, LocalDate endDate) {
-        return employeeRepository.findByHireDateBetween(startDate, endDate);
-    }
-
-    public Long countEmployeesByRole(String role) {
-        return employeeRepository.countByRoleAndActive(role);
-    }
 }

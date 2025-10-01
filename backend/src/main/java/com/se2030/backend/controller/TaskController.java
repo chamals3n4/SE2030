@@ -72,46 +72,6 @@ public class TaskController {
         return new ResponseEntity<>(taskService.byProject(projectId), HttpStatus.OK);
     }
 
-    @GetMapping("/status/{status}")
-    public ResponseEntity<List<Task>> byStatus(@PathVariable("status") String status) {
-        return new ResponseEntity<>(taskService.byStatus(status), HttpStatus.OK);
-    }
-
-    @GetMapping("/priority/{priority}")
-    public ResponseEntity<List<Task>> byPriority(@PathVariable("priority") String priority) {
-        return new ResponseEntity<>(taskService.byPriority(priority), HttpStatus.OK);
-    }
-
-    @GetMapping("/started-between")
-    public ResponseEntity<List<Task>> startedBetween(
-            @RequestParam("start") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
-            @RequestParam("end") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
-        return new ResponseEntity<>(taskService.startBetween(start, end), HttpStatus.OK);
-    }
-
-    @GetMapping("/due-between")
-    public ResponseEntity<List<Task>> dueBetween(
-            @RequestParam("start") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
-            @RequestParam("end") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
-        return new ResponseEntity<>(taskService.dueBetween(start, end), HttpStatus.OK);
-    }
-
-    @GetMapping("/search")
-    public ResponseEntity<List<Task>> search(@RequestParam("q") String q) {
-        return new ResponseEntity<>(taskService.search(q), HttpStatus.OK);
-    }
-
-    @PostMapping("/{id}/progress")
-    public ResponseEntity<Task> updateProgress(@PathVariable("id") Long id, @RequestParam Integer percent) {
-        try {
-            Task t = taskService.getById(id).orElseThrow();
-            t.setProgressPercent(percent);
-            Task updated = taskService.update(id, t);
-            return new ResponseEntity<>(updated, HttpStatus.OK);
-        } catch (RuntimeException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
 
     // -------- TA (merged) --------
     @GetMapping("/{taskId}/assignments")
@@ -130,8 +90,10 @@ public class TaskController {
         Task taskRef = new Task();
         taskRef.setTaskId(taskId);
         ta.setTask(taskRef);
+        
         com.se2030.backend.model.Employee empRef = new com.se2030.backend.model.Employee();
         empRef.setEmployeeId(employeeId);
+        
         ta.setEmployee(empRef);
         if (status != null) ta.setAssignmentStatus(status);
         if (dueDate != null) ta.setDueDate(dueDate);

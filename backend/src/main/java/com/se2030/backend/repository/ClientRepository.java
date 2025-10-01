@@ -12,14 +12,4 @@ import java.util.Optional;
 @Repository
 public interface ClientRepository extends JpaRepository<Client, Long> {
 
-    Optional<Client> findByEmail(String email);
-
-    List<Client> findByNameContainingIgnoreCase(String name);
-
-    Optional<Client> findByPhone(String phone);
-
-    @Query("SELECT c FROM Client c WHERE " +
-            "LOWER(c.name) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
-            "LOWER(c.email) LIKE LOWER(CONCAT('%', :search, '%'))")
-    List<Client> searchByNameOrEmail(@Param("search") String search);
 }

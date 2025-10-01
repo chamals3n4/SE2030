@@ -12,14 +12,6 @@ import java.util.List;
 @Repository
 public interface TaskRepository extends JpaRepository<Task, Long> {
     List<Task> findByProject_ProjectId(Long projectId);
-    List<Task> findByStatus(String status);
-    List<Task> findByPriority(String priority);
-    List<Task> findByStartDateBetween(LocalDate start, LocalDate end);
-    List<Task> findByDueDateBetween(LocalDate start, LocalDate end);
-    List<Task> findByTitleContainingIgnoreCase(String title);
-
-    @Query("SELECT t FROM Task t WHERE LOWER(t.title) LIKE LOWER(CONCAT('%', :q, '%')) OR LOWER(t.description) LIKE LOWER(CONCAT('%', :q, '%'))")
-    List<Task> search(@Param("q") String q);
 }
 
 
