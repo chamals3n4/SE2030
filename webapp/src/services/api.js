@@ -40,6 +40,7 @@ export const projectAPI = {
 
 export const publicAPI = {
     health: () => publicApi.get('/public/health'),
+    weather: () => publicApi.get('/public/weather'),
 };
 
 export const clientAPI = {

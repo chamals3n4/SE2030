@@ -13,7 +13,7 @@ export default function Construction() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Card className="shadow-none hover:shadow-md transition-shadow">
+                <Card className="shadow-none  transition-shadow">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <FolderOpen className="h-5 w-5" />
@@ -28,7 +28,7 @@ export default function Construction() {
                     </CardContent>
                 </Card>
 
-                <Card className="shadow-none hover:shadow-md transition-shadow">
+                <Card className="shadow-none transition-shadow">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <ShoppingCart className="h-5 w-5" />
@@ -37,13 +37,13 @@ export default function Construction() {
                     </CardHeader>
                     <CardContent>
                         <p className="text-sm text-gray-600 mb-3">Browse products from suppliers.</p>
-                        <Link to="/marketplace">
+                        <Link to="/construction/marketplace">
                             <Button className="w-full">Open Marketplace</Button>
                         </Link>
                     </CardContent>
                 </Card>
 
-                <Card className="shadow-none hover:shadow-md transition-shadow">
+                <Card className="shadow-none transition-shadow">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <Package className="h-5 w-5" />

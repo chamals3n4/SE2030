@@ -6,17 +6,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
 import { Label } from '../components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+// Tabs removed
 import { Badge } from '../components/ui/badge';
 import { Search, Package, Wrench, TrendingUp, TrendingDown, Plus, Minus, DollarSign, Building, Calendar, Filter } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function Stock() {
-    const [activeTab, setActiveTab] = useState('overview');
+    // tabs removed
 
     // Data states
     const [stockItems, setStockItems] = useState([]);
-    const [stockMovements, setStockMovements] = useState([]);
     const [loading, setLoading] = useState(true);
 
     // Filter states
@@ -43,7 +42,6 @@ export default function Stock() {
                 stockAPI.getAll()
             ]);
             setStockItems(stockRes.data);
-            setStockMovements([]);
         } catch (error) {
             toast.error('Failed to fetch stock data');
             console.error('Error fetching stock data:', error);
@@ -135,7 +133,7 @@ export default function Stock() {
             {/* Header */}
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-3xl font-bold">Stock Management</h1>
+                    <h1 className="text-3xl font-medium">Stock Management</h1>
                     <p className="text-gray-600 mt-1">Manage company inventory and stock movements</p>
                 </div>
             </div>
@@ -144,14 +142,14 @@ export default function Stock() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {getStatsCards().map((stat, index) => (
                     <Card key={index} className="shadow-none">
-                        <CardContent className="px-3 py-1">
+                        <CardContent className="px-3 py-0.5">
                             <div className="flex items-center space-x-3">
-                                <div className={`p-1.5 rounded-lg ${stat.bgColor}`}>
-                                    <stat.icon className={`h-4 w-4 ${stat.color}`} />
+                                <div className={`p-1 rounded-lg ${stat.bgColor}`}>
+                                    <stat.icon className={`h-3.5 w-3.5 ${stat.color}`} />
                                 </div>
                                 <div className="flex-1">
                                     <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">{stat.title}</p>
-                                    <p className="text-lg font-bold text-gray-900">{stat.value}</p>
+                                    <p className="text-base font-semibold text-gray-900">{stat.value}</p>
                                 </div>
                             </div>
                         </CardContent>
@@ -159,167 +157,103 @@ export default function Stock() {
                 ))}
             </div>
 
-            {/* Tabs */}
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <TabsList>
-                    <TabsTrigger value="overview">Stock Overview</TabsTrigger>
-                    <TabsTrigger value="movements">Stock Movements</TabsTrigger>
-                </TabsList>
+            {/* Stock Overview */}
+            <div className="space-y-4">
+                {/* Filters */}
+                <div className="flex items-center space-x-4">
+                    <div className="relative flex-1 max-w-md">
+                        <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                        <Input
+                            placeholder="Search stock items..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="pl-9 shadow-none"
+                        />
+                    </div>
+                    <Select value={statusFilter} onValueChange={setStatusFilter}>
+                        <SelectTrigger className="w-40">
+                            <SelectValue placeholder="Status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">All Status</SelectItem>
+                            <SelectItem value="ACTIVE">Active</SelectItem>
+                            <SelectItem value="INACTIVE">Inactive</SelectItem>
+                            <SelectItem value="MAINTENANCE">Maintenance</SelectItem>
+                        </SelectContent>
+                    </Select>
+                    <Select value={typeFilter} onValueChange={setTypeFilter}>
+                        <SelectTrigger className="w-40">
+                            <SelectValue placeholder="Type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">All Types</SelectItem>
+                            <SelectItem value="material">Materials</SelectItem>
+                            <SelectItem value="equipment">Equipment</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
 
-                {/* Stock Overview Tab */}
-                <TabsContent value="overview" className="space-y-4">
-                    {/* Filters */}
-                    <div className="flex items-center space-x-4">
-                        <div className="relative flex-1 max-w-md">
-                            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                            <Input
-                                placeholder="Search stock items..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="pl-9 shadow-none"
-                            />
+                {/* Stock Items Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {filteredStockItems.length === 0 ? (
+                        <div className="col-span-full flex flex-col items-center justify-center py-12">
+                            <Package className="h-12 w-12 text-gray-400 mb-2" />
+                            <p className="text-gray-500">No stock items found</p>
                         </div>
-                        <Select value={statusFilter} onValueChange={setStatusFilter}>
-                            <SelectTrigger className="w-40">
-                                <SelectValue placeholder="Status" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">All Status</SelectItem>
-                                <SelectItem value="ACTIVE">Active</SelectItem>
-                                <SelectItem value="INACTIVE">Inactive</SelectItem>
-                                <SelectItem value="MAINTENANCE">Maintenance</SelectItem>
-                            </SelectContent>
-                        </Select>
-                        <Select value={typeFilter} onValueChange={setTypeFilter}>
-                            <SelectTrigger className="w-40">
-                                <SelectValue placeholder="Type" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">All Types</SelectItem>
-                                <SelectItem value="material">Materials</SelectItem>
-                                <SelectItem value="equipment">Equipment</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
+                    ) : (
+                        filteredStockItems.map((item) => (
+                            <div key={item.stockId || item.resourceId} className="border border-gray-200 rounded-lg p-4">
+                                <div className="flex justify-between items-start">
+                                    <h3 className="text-lg font-medium">{item.name}</h3>
+                                    <Badge variant={item.status === 'ACTIVE' ? 'default' : 'secondary'}>
+                                        {item.status}
+                                    </Badge>
+                                </div>
+                                <div className="mt-2 space-y-1">
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-gray-500">Type:</span>
+                                        <span className="font-medium">{(item.resourceType || '').toUpperCase()}</span>
+                                    </div>
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-gray-500">Stock:</span>
+                                        <span className="font-medium">{item.currentQuantity} {item.unitOfMeasure || ''}</span>
+                                    </div>
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-gray-500">Value:</span>
+                                        <span className="font-medium text-green-600">${Number((item.unitCost || 0) * (item.currentQuantity || 0)).toFixed(2)}</span>
+                                    </div>
+                                </div>
 
-                    {/* Stock Items Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {filteredStockItems.length === 0 ? (
-                            <div className="col-span-full flex flex-col items-center justify-center py-12">
-                                <Package className="h-12 w-12 text-gray-400 mb-2" />
-                                <p className="text-gray-500">No stock items found</p>
+                                {item.type === 'material' && item.currentStock <= (item.reorderLevel || 10) && (
+                                    <div className="mt-2 bg-red-50 border border-red-200 rounded-md p-1.5">
+                                        <p className="text-sm text-red-600 font-medium">
+                                            Low Stock Alert
+                                        </p>
+                                        <p className="text-xs text-red-500">
+                                            Reorder level: {item.reorderLevel || 10}
+                                        </p>
+                                    </div>
+                                )}
+
+                                <div className="pt-2 flex justify-end">
+                                    <Dialog open={isAdjustDialogOpen} onOpenChange={setIsAdjustDialogOpen}>
+                                        <DialogTrigger asChild>
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => setAdjustForm({ ...adjustForm, resourceId: item.resourceId })}
+                                            >
+                                                <Plus className="h-4 w-4 mr-1" />
+                                                Adjust
+                                            </Button>
+                                        </DialogTrigger>
+                                    </Dialog>
+                                </div>
                             </div>
-                        ) : (
-                            filteredStockItems.map((item) => (
-                                <Card key={item.stockId || item.resourceId} className="shadow-none hover:shadow-md transition-shadow">
-                                    <CardHeader className="pb-3">
-                                        <div className="flex justify-between items-start">
-                                            <CardTitle className="text-lg">{item.name}</CardTitle>
-                                            <Badge variant={item.status === 'ACTIVE' ? 'default' : 'secondary'}>
-                                                {item.status}
-                                            </Badge>
-                                        </div>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="space-y-3">
-                                            <p className="text-sm text-gray-600 line-clamp-2">{item.description}</p>
-
-                                            <div className="space-y-2">
-                                                <div className="flex justify-between text-sm">
-                                                    <span className="text-gray-500">Type:</span>
-                                                    <span className="font-medium">{(item.resourceType || '').toUpperCase()}</span>
-                                                </div>
-                                                <div className="flex justify-between text-sm">
-                                                    <span className="text-gray-500">Stock:</span>
-                                                    <span className="font-medium">{item.currentQuantity} {item.unitOfMeasure || ''}</span>
-                                                </div>
-                                                <div className="flex justify-between text-sm">
-                                                    <span className="text-gray-500">Value:</span>
-                                                    <span className="font-medium text-green-600">${Number((item.unitCost || 0) * (item.currentQuantity || 0)).toFixed(2)}</span>
-                                                </div>
-                                            </div>
-
-                                            {item.type === 'material' && item.currentStock <= (item.reorderLevel || 10) && (
-                                                <div className="bg-red-50 border border-red-200 rounded-md p-2">
-                                                    <p className="text-sm text-red-600 font-medium">
-                                                        Low Stock Alert
-                                                    </p>
-                                                    <p className="text-xs text-red-500">
-                                                        Reorder level: {item.reorderLevel || 10}
-                                                    </p>
-                                                </div>
-                                            )}
-
-                                            <div className="flex justify-end space-x-2 pt-3 border-t">
-                                                <Dialog open={isAdjustDialogOpen} onOpenChange={setIsAdjustDialogOpen}>
-                                                    <DialogTrigger asChild>
-                                                        <Button
-                                                            variant="outline"
-                                                            size="sm"
-                                                            onClick={() => setAdjustForm({ ...adjustForm, resourceId: item.resourceId })}
-                                                        >
-                                                            <Plus className="h-4 w-4 mr-1" />
-                                                            Adjust
-                                                        </Button>
-                                                    </DialogTrigger>
-                                                </Dialog>
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            ))
-                        )}
-                    </div>
-                </TabsContent>
-
-                {/* Stock Movements Tab */}
-                <TabsContent value="movements" className="space-y-4">
-                    <div className="space-y-4">
-                        {stockMovements.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center py-12">
-                                <TrendingUp className="h-12 w-12 text-gray-400 mb-2" />
-                                <p className="text-gray-500">No stock movements found</p>
-                            </div>
-                        ) : (
-                            <div className="space-y-3">
-                                {stockMovements.map((movement) => (
-                                    <Card key={movement.movementId} className="shadow-none">
-                                        <CardContent className="p-4">
-                                            <div className="flex justify-between items-start">
-                                                <div className="flex-1">
-                                                    <div className="flex items-center space-x-2">
-                                                        <h4 className="font-medium">{movement.resourceName}</h4>
-                                                        <Badge variant={
-                                                            movement.movementType === 'RECEIVE' ? 'default' :
-                                                                movement.movementType === 'CONSUME' ? 'destructive' : 'secondary'
-                                                        }>
-                                                            {movement.movementType}
-                                                        </Badge>
-                                                    </div>
-                                                    <p className="text-sm text-gray-600 mt-1">
-                                                        Quantity: {movement.quantity} {movement.unitOfMeasure}
-                                                    </p>
-                                                    {movement.notes && (
-                                                        <p className="text-sm text-gray-500 mt-1">{movement.notes}</p>
-                                                    )}
-                                                </div>
-                                                <div className="text-right">
-                                                    <p className="text-sm text-gray-500">
-                                                        {new Date(movement.movementDate).toLocaleDateString()}
-                                                    </p>
-                                                    <p className="text-xs text-gray-400">
-                                                        {new Date(movement.movementDate).toLocaleTimeString()}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </CardContent>
-                                    </Card>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                </TabsContent>
-            </Tabs>
+                        ))
+                    )}
+                </div>
+            </div>
 
             {/* Stock Adjustment Dialog */}
             <Dialog open={isAdjustDialogOpen} onOpenChange={setIsAdjustDialogOpen}>

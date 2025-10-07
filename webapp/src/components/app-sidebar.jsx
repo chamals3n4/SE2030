@@ -21,6 +21,7 @@ import {
     SidebarMenuItem,
     SidebarRail,
 } from "@/components/ui/sidebar"
+import WeatherCard from "@/components/WeatherCard"
 
 function buildNav(locationPathname) {
     const match = locationPathname.match(/^\/projects\/([^\/]+)/)
@@ -98,6 +99,7 @@ export function AppSidebar({ ...props }) {
                                 )
                             })}
                         </SidebarMenu>
+                        <WeatherCard />
                     </SidebarGroupContent>
                 </SidebarGroup>
             </SidebarContent>

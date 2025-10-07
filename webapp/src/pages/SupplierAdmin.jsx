@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { supplierAPI, materialAPI, equipmentAPI } from '../services/api';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+// Using custom divs instead of Card for a consistent compact style
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../components/ui/alert-dialog';
 import { Label } from '../components/ui/label';
@@ -259,7 +259,7 @@ export default function SupplierAdmin() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold">{supplier?.companyName}</h1>
+                    <h1 className="text-3xl font-medium">{supplier?.companyName}</h1>
                     <p className="text-gray-600 mt-1">Store management dashboard</p>
                 </div>
                 <div className="flex gap-2">
@@ -268,62 +268,27 @@ export default function SupplierAdmin() {
                 </div>
             </div>
 
-            {/* Stats Cards */}
+            {/* Stats Cards - compact size same as other pages */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <Card className="shadow-none">
-                    <CardContent className="px-3 py-1">
+                {[{
+                    icon: <Package className="h-4 w-4 text-blue-600" />, bg: 'bg-blue-50', title: 'Materials', value: materials.length
+                }, {
+                    icon: <Wrench className="h-4 w-4 text-green-600" />, bg: 'bg-green-50', title: 'Equipment', value: equipment.length
+                }, {
+                    icon: <DollarSign className="h-4 w-4 text-purple-600" />, bg: 'bg-purple-50', title: 'Total Value', value: (materials.reduce((s, m) => s + (m.price * m.currentStock), 0) + equipment.reduce((s, e) => s + e.price, 0)).toLocaleString()
+                }, {
+                    icon: <TrendingUp className="h-4 w-4 text-orange-600" />, bg: 'bg-orange-50', title: 'Active Items', value: materials.filter(m => m.status === 'ACTIVE').length + equipment.filter(e => e.status === 'ACTIVE').length
+                }].map((stat, idx) => (
+                    <div key={idx} className="border rounded-lg p-3">
                         <div className="flex items-center space-x-3">
-                            <div className="p-1.5 rounded-lg bg-blue-50">
-                                <Package className="h-4 w-4 text-blue-600" />
-                            </div>
+                            <div className={`p-1 rounded-lg ${stat.bg}`}>{stat.icon}</div>
                             <div className="flex-1">
-                                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Materials</p>
-                                <p className="text-lg font-bold text-gray-900">{materials.length}</p>
+                                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">{stat.title}</p>
+                                <p className="text-base font-semibold text-gray-900">{stat.value}</p>
                             </div>
                         </div>
-                    </CardContent>
-                </Card>
-                <Card className="shadow-none">
-                    <CardContent className="px-3 py-1">
-                        <div className="flex items-center space-x-3">
-                            <div className="p-1.5 rounded-lg bg-green-50">
-                                <Wrench className="h-4 w-4 text-green-600" />
-                            </div>
-                            <div className="flex-1">
-                                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Equipment</p>
-                                <p className="text-lg font-bold text-gray-900">{equipment.length}</p>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-                <Card className="shadow-none">
-                    <CardContent className="px-3 py-1">
-                        <div className="p-1.5 rounded-lg bg-purple-50">
-                            <DollarSign className="h-4 w-4 text-purple-600" />
-                        </div>
-                        <div className="flex-1">
-                            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Total Value</p>
-                            <p className="text-lg font-bold text-gray-900">
-                                ${(materials.reduce((sum, m) => sum + (m.price * m.currentStock), 0) +
-                                    equipment.reduce((sum, e) => sum + e.price, 0)).toLocaleString()}
-                            </p>
-                        </div>
-                    </CardContent>
-                </Card>
-                <Card className="shadow-none">
-                    <CardContent className="px-3 py-1">
-                        <div className="p-1.5 rounded-lg bg-orange-50">
-                            <TrendingUp className="h-4 w-4 text-orange-600" />
-                        </div>
-                        <div className="flex-1">
-                            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Active Items</p>
-                            <p className="text-lg font-bold text-gray-900">
-                                {materials.filter(m => m.status === 'ACTIVE').length +
-                                    equipment.filter(e => e.status === 'ACTIVE').length}
-                            </p>
-                        </div>
-                    </CardContent>
-                </Card>
+                    </div>
+                ))}
             </div>
 
             {/* Tabs */}
@@ -431,55 +396,47 @@ export default function SupplierAdmin() {
                     {/* Materials Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {filteredMaterials.map((material) => (
-                            <Card key={material.resourceId} className="shadow-none hover:shadow-md transition-shadow">
-                                <CardHeader className="pb-3">
-                                    <div className="flex justify-between items-start">
-                                        <CardTitle className="text-lg">{material.name}</CardTitle>
-                                        <Badge variant={material.status === 'ACTIVE' ? 'default' : 'secondary'}>
-                                            {material.status}
-                                        </Badge>
+                            <div key={material.resourceId} className="border border-gray-200 rounded-lg p-4">
+                                <div className="flex justify-between items-start">
+                                    <h3 className="text-lg font-medium">{material.name}</h3>
+                                    <Badge variant={material.status === 'ACTIVE' ? 'default' : 'secondary'}>
+                                        {material.status}
+                                    </Badge>
+                                </div>
+                                <div className="mt-2 space-y-2">
+                                    <p className="text-sm text-gray-600">{material.description}</p>
+                                    <div className="flex justify-between text-sm">
+                                        <span>Stock: {material.currentStock} {material.unitOfMeasure}</span>
+                                        <span className="font-medium">${material.price?.toFixed(2) || '0.00'}</span>
                                     </div>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="space-y-2">
-                                        <p className="text-sm text-gray-600">{material.description}</p>
-                                        <div className="flex justify-between text-sm">
-                                            <span>Stock: {material.currentStock} {material.unitOfMeasure}</span>
-                                            <span className="font-medium">${material.price?.toFixed(2) || '0.00'}</span>
-                                        </div>
-                                    </div>
-                                    <div className="flex justify-end space-x-2 mt-4 pt-3 border-t">
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => openEditMaterial(material)}
-                                        >
-                                            <Edit className="h-4 w-4" />
-                                        </Button>
-                                        <AlertDialog>
-                                            <AlertDialogTrigger asChild>
-                                                <Button variant="outline" size="sm">
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
-                                            </AlertDialogTrigger>
-                                            <AlertDialogContent>
-                                                <AlertDialogHeader>
-                                                    <AlertDialogTitle>Delete Material</AlertDialogTitle>
-                                                    <AlertDialogDescription>
-                                                        Are you sure you want to delete "{material.name}"? This action cannot be undone.
-                                                    </AlertDialogDescription>
-                                                </AlertDialogHeader>
-                                                <AlertDialogFooter>
-                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                    <AlertDialogAction onClick={() => handleDeleteMaterial(material.resourceId)}>
-                                                        Delete
-                                                    </AlertDialogAction>
-                                                </AlertDialogFooter>
-                                            </AlertDialogContent>
-                                        </AlertDialog>
-                                    </div>
-                                </CardContent>
-                            </Card>
+                                </div>
+                                <div className="flex justify-end space-x-2 mt-3">
+                                    <Button variant="outline" size="sm" onClick={() => openEditMaterial(material)}>
+                                        <Edit className="h-4 w-4" />
+                                    </Button>
+                                    <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                            <Button variant="outline" size="sm">
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle>Delete Material</AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                    Are you sure you want to delete "{material.name}"? This action cannot be undone.
+                                                </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                <AlertDialogAction onClick={() => handleDeleteMaterial(material.resourceId)}>
+                                                    Delete
+                                                </AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
+                                </div>
+                            </div>
                         ))}
                     </div>
                 </TabsContent>
@@ -581,58 +538,50 @@ export default function SupplierAdmin() {
                     {/* Equipment Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {filteredEquipment.map((equipment) => (
-                            <Card key={equipment.resourceId} className="shadow-none hover:shadow-md transition-shadow">
-                                <CardHeader className="pb-3">
-                                    <div className="flex justify-between items-start">
-                                        <CardTitle className="text-lg">{equipment.name}</CardTitle>
-                                        <Badge variant={equipment.status === 'ACTIVE' ? 'default' : 'secondary'}>
-                                            {equipment.status}
-                                        </Badge>
+                            <div key={equipment.resourceId} className="border border-gray-200 rounded-lg p-4">
+                                <div className="flex justify-between items-start">
+                                    <h3 className="text-lg font-medium">{equipment.name}</h3>
+                                    <Badge variant={equipment.status === 'ACTIVE' ? 'default' : 'secondary'}>
+                                        {equipment.status}
+                                    </Badge>
+                                </div>
+                                <div className="mt-2 space-y-2">
+                                    <p className="text-sm text-gray-600">{equipment.description}</p>
+                                    <div className="flex justify-between text-sm">
+                                        <span>{equipment.equipmentType}</span>
+                                        <span className="font-medium">${equipment.price?.toFixed(2) || '0.00'}</span>
                                     </div>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="space-y-2">
-                                        <p className="text-sm text-gray-600">{equipment.description}</p>
-                                        <div className="flex justify-between text-sm">
-                                            <span>{equipment.equipmentType}</span>
-                                            <span className="font-medium">${equipment.price?.toFixed(2) || '0.00'}</span>
-                                        </div>
-                                        {equipment.model && (
-                                            <p className="text-xs text-gray-500">Model: {equipment.model}</p>
-                                        )}
-                                    </div>
-                                    <div className="flex justify-end space-x-2 mt-4 pt-3 border-t">
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => openEditEquipment(equipment)}
-                                        >
-                                            <Edit className="h-4 w-4" />
-                                        </Button>
-                                        <AlertDialog>
-                                            <AlertDialogTrigger asChild>
-                                                <Button variant="outline" size="sm">
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
-                                            </AlertDialogTrigger>
-                                            <AlertDialogContent>
-                                                <AlertDialogHeader>
-                                                    <AlertDialogTitle>Delete Equipment</AlertDialogTitle>
-                                                    <AlertDialogDescription>
-                                                        Are you sure you want to delete "{equipment.name}"? This action cannot be undone.
-                                                    </AlertDialogDescription>
-                                                </AlertDialogHeader>
-                                                <AlertDialogFooter>
-                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                    <AlertDialogAction onClick={() => handleDeleteEquipment(equipment.resourceId)}>
-                                                        Delete
-                                                    </AlertDialogAction>
-                                                </AlertDialogFooter>
-                                            </AlertDialogContent>
-                                        </AlertDialog>
-                                    </div>
-                                </CardContent>
-                            </Card>
+                                    {equipment.model && (
+                                        <p className="text-xs text-gray-500">Model: {equipment.model}</p>
+                                    )}
+                                </div>
+                                <div className="flex justify-end space-x-2 mt-3">
+                                    <Button variant="outline" size="sm" onClick={() => openEditEquipment(equipment)}>
+                                        <Edit className="h-4 w-4" />
+                                    </Button>
+                                    <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                            <Button variant="outline" size="sm">
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle>Delete Equipment</AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                    Are you sure you want to delete "{equipment.name}"? This action cannot be undone.
+                                                </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                <AlertDialogAction onClick={() => handleDeleteEquipment(equipment.resourceId)}>
+                                                    Delete
+                                                </AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
+                                </div>
+                            </div>
                         ))}
                     </div>
                 </TabsContent>

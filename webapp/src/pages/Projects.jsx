@@ -266,7 +266,7 @@ export default function Projects() {
             </div>
 
             {/* Project Statistics Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <Card className="shadow-none">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Progress</CardTitle>
@@ -327,9 +327,9 @@ export default function Projects() {
             </div>
 
             {/* Project Details and Information */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
                 {/* Project Information */}
-                <Card className="shadow-none">
+                <Card className="shadow-none lg:col-span-1">
                     <CardHeader>
                         <CardTitle>Project Information</CardTitle>
                     </CardHeader>
@@ -372,38 +372,41 @@ export default function Projects() {
                     </CardContent>
                 </Card>
 
-                {/* Recent Activities */}
-                <Card className="shadow-none">
+                {/* Project Tasks (replaces Recent Activity) */}
+                <Card className="shadow-none lg:col-span-2">
                     <CardHeader>
-                        <CardTitle>Recent Activity</CardTitle>
-                        <CardDescription>Latest updates for this project</CardDescription>
+                        <CardTitle>Project Tasks</CardTitle>
+                        <CardDescription>Current tasks and their status for {selectedProject.name}</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <div className="space-y-4">
-                            {projectActivities.map((activity) => (
-                                <div key={activity.id} className="flex items-start space-x-3">
-                                    <div className="flex-shrink-0 mt-1">
-                                        {getActivityIcon(activity.type)}
-                                    </div>
-                                    <div className="min-w-0 flex-1">
-                                        <p className="text-sm font-medium text-gray-900">
-                                            {activity.activity}
-                                        </p>
-                                        <p className="text-sm text-gray-500">
-                                            {activity.user}
-                                        </p>
-                                        <p className="text-xs text-gray-400 mt-1">
-                                            {activity.time}
-                                        </p>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Task Name</TableHead>
+                                    <TableHead>Status</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {projectTasks.map((task) => (
+                                    <TableRow key={task.id}>
+                                        <TableCell className="font-medium">{task.name}</TableCell>
+                                        <TableCell>
+                                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${task.status === 'Completed' ? 'bg-green-100 text-green-800' :
+                                                task.status === 'In Progress' ? 'bg-blue-100 text-blue-800' :
+                                                    'bg-gray-100 text-gray-800'
+                                                }`}>
+                                                {task.status}
+                                            </span>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
                     </CardContent>
                 </Card>
 
                 {/* Budget Overview */}
-                <Card className="shadow-none">
+                <Card className="shadow-none lg:col-span-1">
                     <CardHeader>
                         <CardTitle>Budget Overview</CardTitle>
                     </CardHeader>
@@ -420,7 +423,7 @@ export default function Projects() {
 
                         <div className="w-full bg-gray-200 rounded-full h-2">
                             <div
-                                className="bg-blue-500 h-2 rounded-full"
+                                className="bg-red-500 h-2 rounded-full"
                                 style={{ width: `${Math.round((selectedProject.spent / selectedProject.budget) * 100)}%` }}
                             ></div>
                         </div>
@@ -444,48 +447,7 @@ export default function Projects() {
                 </Card>
             </div>
 
-            {/* Tasks Table */}
-            <Card className="shadow-none">
-                <CardHeader>
-                    <CardTitle>Project Tasks</CardTitle>
-                    <CardDescription>Current tasks and their status for {selectedProject.name}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Task Name</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead>Assignee</TableHead>
-                                <TableHead>Due Date</TableHead>
-                                <TableHead>Priority</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {projectTasks.map((task) => (
-                                <TableRow key={task.id}>
-                                    <TableCell className="font-medium">{task.name}</TableCell>
-                                    <TableCell>
-                                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${task.status === 'Completed' ? 'bg-green-100 text-green-800' :
-                                            task.status === 'In Progress' ? 'bg-blue-100 text-blue-800' :
-                                                'bg-gray-100 text-gray-800'
-                                            }`}>
-                                            {task.status}
-                                        </span>
-                                    </TableCell>
-                                    <TableCell className="text-sm">{task.assignee}</TableCell>
-                                    <TableCell className="text-sm">{formatDate(task.dueDate)}</TableCell>
-                                    <TableCell>
-                                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${priorityColors[task.priority]}`}>
-                                            {task.priority}
-                                        </span>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </CardContent>
-            </Card>
+            {/* Tasks Table moved above */}
         </div>
     )
 }
