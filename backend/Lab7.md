@@ -1,4 +1,4 @@
-### Lab 6 - Design Patterns Implementation
+### Lab 7 - Design Patterns Implementation
 
 ### Source Code Files
 
