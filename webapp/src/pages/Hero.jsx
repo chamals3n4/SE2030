@@ -1,58 +1,37 @@
 import { useAuthContext } from "@asgardeo/auth-react";
-import { Button } from "../components/ui/button";
 import { Link } from "react-router-dom";
+import { Button } from "../components/ui/button";
 import { ModeToggle } from "@/components/mode-toggle";
+import { GradientCanvas } from "@/components/gradient-canvas";
+import { LoginForm } from "@/components/login-form";
 export default function Hero() {
   const { state, signIn, signOut } = useAuthContext();
   return (
-    <div className="min-h-screen flex items-center justify-center p-6">
-      <div className="w-full max-w-5xl">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-2xl font-semibold">Construction Management Portal</h1>
-          <div className="pt-2">
-            {state.isAuthenticated ? (
-              <div className="flex items-center gap-3">
-                <span className="text-sm text-gray-700">Hi 👋 {state.username}</span>
-                <Button className="flex items-center gap-2" onClick={() => signOut()}>
-                  Sign Out
-                </Button>
-              </div>
-            ) : (
-              <Button className="flex items-center gap-2" onClick={() => signIn()}>
-                Sign in
-              </Button>
-            )}
-          </div>
-        </div>
-
-        {state.isAuthenticated && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="border rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-2">Stakeholder Management</h2>
-              <p className="text-gray-600 mb-4">Manage external suppliers and partners.</p>
-              <div className="flex gap-3">
-                <Link to="/suppliers">
-                  <Button>Suppliers Management</Button>
-                </Link>
-              </div>
-            </div>
-
-            <div className="border rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-2">Construction Management</h2>
-              <p className="text-gray-600 mb-4">Projects, marketplace, and your company store.</p>
-              <div className="flex gap-3">
-                <Link to="/construction">
-                  <Button>Open Construction</Button>
-                </Link>
-              </div>
+    <main className="w-screen h-screen flex">
+      <div className="w-1/2 h-full flex items-center justify-center p-6 md:p-10">
+        {state.isAuthenticated ? (
+          <div className="w-full max-w-md">
+            <h1 className="text-4xl md:text-5xl font-semibold tracking-tight">Focus on the build — we handle the hassle</h1>
+            <p className="mt-3 text-base md:text-lg text-muted-foreground">Centralize your construction projects, suppliers, materials, tasks, and finance in one simple workspace.</p>
+            <div className="mt-5 flex flex-col sm:flex-row gap-3">
+              <Link to="/suppliers">
+                <Button className="h-11 w-full sm:w-auto rounded-none shadow-none bg-neutral-900 text-neutral-50 border-0 hover:bg-neutral-800 transition-colors duration-200 ease">Stakeholder Management</Button>
+              </Link>
+              <Link to="/construction">
+                <Button className="h-11 w-full sm:w-auto rounded-none shadow-none bg-neutral-900 text-neutral-50 border-0 hover:bg-neutral-800 transition-colors duration-200 ease">Construction Management</Button>
+              </Link>
             </div>
           </div>
+        ) : (
+          <LoginForm onSignIn={signIn} />
         )}
       </div>
-      {/* Theme toggle - bottom right */}
+      <div className="w-1/2 h-full">
+        <GradientCanvas />
+      </div>
       <div className="fixed bottom-4 right-4 z-50">
         <ModeToggle />
       </div>
-    </div>
+    </main>
   );
 }
