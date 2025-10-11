@@ -6,6 +6,7 @@ import com.se2030.backend.repository.EquipmentRepository;
 import com.se2030.backend.repository.MaterialRepository;
 import com.se2030.backend.repository.ProjectRepository;
 import com.se2030.backend.repository.SupplierRepository;
+import com.se2030.backend.strategy.ResourceProcessingContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,14 +23,15 @@ public class InventoryService {
     @Autowired private EquipmentRepository equipmentRepository;
     @Autowired private ProjectRepository projectRepository;
     @Autowired private SupplierRepository supplierRepository;
+    @Autowired private ResourceProcessingContext resourceProcessingContext;
 
+    // Legacy method
     public CompanyStock addFromPurchase(Long supplierId, Long resourceId, String resourceType, Integer quantity, BigDecimal unitCost, String name, String description) {
         CompanyStock stock = new CompanyStock();
         stock.setStatus("ACTIVE");
         stock.setResourceType(resourceType);
         stock.setCurrentQuantity(quantity);
 
-        // Determine original resource and default attributes
         if ("MATERIAL".equalsIgnoreCase(resourceType)) {
             Material material = materialRepository.findById(resourceId).orElse(null);
             if (material != null) {
@@ -74,8 +76,18 @@ public class InventoryService {
 
         return companyStockRepository.save(stock);
     }
+    
+    // New method using Strategy Pattern
+    public CompanyStock addFromPurchaseWithStrategy(Long supplierId, Long resourceId, String resourceType, Integer quantity, BigDecimal unitCost, String name, String description) {
+        CompanyStock stock = resourceProcessingContext.processResource(resourceType, resourceId, quantity, unitCost, name, description);
+        
+        if (supplierId != null) {
+            supplierRepository.findById(supplierId).ifPresent(stock::setSupplier);
+        }
+        
+        return companyStockRepository.save(stock);
+    }
 
-    // Removed movement/consume/adjust flows per simplified inventory
 }
 
 

@@ -9,6 +9,7 @@ import com.se2030.backend.repository.TaskRepository;
 import com.se2030.backend.repository.IssueRepository;
 import com.se2030.backend.repository.ProjectRepository;
 import com.se2030.backend.repository.ClientRepository;
+import com.se2030.backend.observer.ProjectStatusSubject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +31,9 @@ public class ProjectService {
 
     @Autowired
     private ClientRepository clientRepository;
+    
+    @Autowired
+    private ProjectStatusSubject statusSubject;
 
     public Project create(Project project) {
         if (project.getClient() == null || project.getClient().getClientId() == null) {
@@ -41,7 +45,12 @@ public class ProjectService {
                 .orElseThrow(() -> new RuntimeException("Client not found with id: " + clientId));
 
         project.setClient(client);
-        return projectRepository.save(project);
+        Project savedProject = projectRepository.save(project);
+        
+        // Observer Pattern: Notify client about new project
+        statusSubject.notifyStatusChange(savedProject, null, savedProject.getStatus());
+        
+        return savedProject;
     }
 
     public List<Project> getAll() {
@@ -55,6 +64,7 @@ public class ProjectService {
     public Project update(Long id, Project updated) {
         return projectRepository.findById(id)
                 .map(existing -> {
+                    String oldStatus = existing.getStatus();
                     existing.setName(updated.getName());
                     existing.setDescription(updated.getDescription());
                     existing.setLocation(updated.getLocation());
@@ -63,9 +73,32 @@ public class ProjectService {
                     existing.setStartDate(updated.getStartDate());
                     existing.setPlannedEndDate(updated.getPlannedEndDate());
                     existing.setClient(updated.getClient());
-                    return projectRepository.save(existing);
+                    
+                    Project savedProject = projectRepository.save(existing);
+                    
+                    // Observer Pattern: Notify client about status change
+                    if (!oldStatus.equals(updated.getStatus())) {
+                        statusSubject.notifyStatusChange(savedProject, oldStatus, updated.getStatus());
+                    }
+                    
+                    return savedProject;
                 })
                 .orElseThrow(() -> new RuntimeException("Project not found with id: " + id));
+    }
+    
+    // New method specifically for status updates with Observer Pattern
+    public Project updateProjectStatus(Long projectId, String newStatus) {
+        Project project = projectRepository.findById(projectId)
+            .orElseThrow(() -> new RuntimeException("Project not found with id: " + projectId));
+        
+        String oldStatus = project.getStatus();
+        project.setStatus(newStatus);
+        Project savedProject = projectRepository.save(project);
+        
+        // Observer Pattern: Notify client via SMS
+        statusSubject.notifyStatusChange(savedProject, oldStatus, newStatus);
+        
+        return savedProject;
     }
 
     public void delete(Long id) {
