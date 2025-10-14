@@ -72,7 +72,12 @@ public class ProjectService {
                     existing.setStatus(updated.getStatus());
                     existing.setStartDate(updated.getStartDate());
                     existing.setPlannedEndDate(updated.getPlannedEndDate());
-                    existing.setClient(updated.getClient());
+                    // Ensure we attach a fully-loaded Client entity (not a shallow {clientId})
+                    if (updated.getClient() != null && updated.getClient().getClientId() != null) {
+                        Client attached = clientRepository.findById(updated.getClient().getClientId())
+                                .orElseThrow(() -> new RuntimeException("Client not found with id: " + updated.getClient().getClientId()));
+                        existing.setClient(attached);
+                    }
                     
                     Project savedProject = projectRepository.save(existing);
                     
@@ -93,6 +98,14 @@ public class ProjectService {
         
         String oldStatus = project.getStatus();
         project.setStatus(newStatus);
+        // Ensure client is loaded for observer
+        if (project.getClient() != null && project.getClient().getClientId() != null) {
+            Client attached = clientRepository.findById(project.getClient().getClientId())
+                    .orElse(null);
+            if (attached != null) {
+                project.setClient(attached);
+            }
+        }
         Project savedProject = projectRepository.save(project);
         
         // Observer Pattern: Notify client via SMS

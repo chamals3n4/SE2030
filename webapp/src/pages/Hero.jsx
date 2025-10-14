@@ -2,7 +2,7 @@ import { useAuthContext } from "@asgardeo/auth-react";
 import { Link } from "react-router-dom";
 import { Button } from "../components/ui/button";
 import { ModeToggle } from "@/components/mode-toggle";
-import { GradientCanvas } from "@/components/gradient-canvas";
+// GradientCanvas removed; using static hero image instead
 import { LoginForm } from "@/components/login-form";
 export default function Hero() {
   const { state, signIn, signOut } = useAuthContext();
@@ -27,7 +27,11 @@ export default function Hero() {
         )}
       </div>
       <div className="w-1/2 h-full">
-        <GradientCanvas />
+        <img
+          src="/images/hero.png"
+          alt="Construction site hero"
+          className="w-full h-full object-cover"
+        />
       </div>
       <div className="fixed bottom-4 right-4 z-50">
         <ModeToggle />

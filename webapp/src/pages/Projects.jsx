@@ -111,6 +111,8 @@ export default function Projects() {
     const [projectTasks, setProjectTasks] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState("")
+    const [statusDraft, setStatusDraft] = useState("PLANNED")
+    const [savingStatus, setSavingStatus] = useState(false)
 
     useEffect(() => {
         const load = async () => {
@@ -174,6 +176,38 @@ export default function Projects() {
         }
         load()
     }, [searchParams])
+
+    useEffect(() => {
+        if (selectedProject?.status) setStatusDraft(selectedProject.status)
+    }, [selectedProject])
+
+    const updateProjectStatus = async () => {
+        if (!selectedProject?.id) return
+        try {
+            setSavingStatus(true)
+            const fullRes = await projectAPI.getById(selectedProject.id)
+            const full = fullRes?.data
+
+            const payload = {
+                name: full.name,
+                description: full.description,
+                location: full.location,
+                budget: full.budget,
+                status: statusDraft,
+                startDate: full.startDate,
+                plannedEndDate: full.plannedEndDate,
+                client: full.client ? { clientId: full.client.clientId } : null
+            }
+
+            const resp = await projectAPI.update(selectedProject.id, payload)
+            const updated = resp?.data
+            setSelectedProject(prev => prev ? { ...prev, status: updated.status } : prev)
+        } catch (e) {
+            console.error("Failed to update status", e)
+        } finally {
+            setSavingStatus(false)
+        }
+    }
 
     if (loading) {
         return (
@@ -258,6 +292,27 @@ export default function Projects() {
                     <span className={`px-3 py-1 text-sm font-medium rounded-full ${statusColors[selectedProject.status]}`}>
                         {selectedProject.status}
                     </span>
+
+                    <select
+                        className="border rounded-md px-2 py-1 text-sm"
+                        value={statusDraft}
+                        onChange={(e) => setStatusDraft(e.target.value)}
+                    >
+                        <option value="PLANNED">PLANNED</option>
+                        <option value="IN_PROGRESS">IN_PROGRESS</option>
+                        <option value="COMPLETING">COMPLETING</option>
+                        <option value="COMPLETED">COMPLETED</option>
+                        <option value="ON_HOLD">ON_HOLD</option>
+                    </select>
+
+                    <Button
+                        className="bg-red-500 hover:bg-red-600"
+                        onClick={updateProjectStatus}
+                        disabled={savingStatus}
+                    >
+                        {savingStatus ? "Updating..." : "Update Status"}
+                    </Button>
+
                     <Button className="bg-red-500 hover:bg-red-600">
                         <FileText className="h-4 w-4 mr-2" />
                         Generate Report
