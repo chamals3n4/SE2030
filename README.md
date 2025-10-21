@@ -6,7 +6,7 @@ A platform to plan, track, and manage construction projects in one place. Built 
 
 **Frontend:** React (Vite), Tailwind CSS, shadcn/ui, React Router  
 **Backend:** Spring Boot 3, Spring Security (OAuth2 Resource Server), JPA/Hibernate, MySQL  
-**Additional Services:** Asgardeo (authentication), Twilio (SMS), OpenAPI (springdoc)
+**Additional Services:** Asgardeo (authentication), Twilio (SMS)
 
 ## Prerequisites
 
@@ -17,10 +17,11 @@ Before you start, make sure you have installed or created accounts for:
 - [MySQL 8+](https://dev.mysql.com/downloads/mysql/)
 - [Asgardeo Account](https://wso2.com/asgardeo/) (for authentication)
 - [Twilio Account](https://www.twilio.com/) (for SMS/notifications)
+- [OpenWeatherMap](https://openweathermap.org/api) ( for weather updates)
 
 ## Setup Process
 
-### 1. Clone the Repository
+### 1. Clone the forked Repository
 
 ```bash
 git clone https://github.com/<username>/SE2030.git
@@ -77,7 +78,7 @@ Backend available at: `http://localhost:8080`
 
 ```bash
 cd webapp
-npm install
+pnpm install
 ```
 
 #### 3.2 Configure Asgardeo (Frontend)
@@ -95,17 +96,11 @@ Adjust to match how your app reads these values.
 #### 3.3 Run Frontend
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
 Frontend available at: `http://localhost:5173`
 
----
-
-## Running the Application
-
-- **Backend (Spring Boot):** `http://localhost:8080`
-- **Frontend (React + Vite):** `http://localhost:5173`
 
 ## Features
 

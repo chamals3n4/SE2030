@@ -325,7 +325,7 @@ export default function SupplierAdmin() {
                                     </DialogDescription>
                                 </DialogHeader>
                                 <form onSubmit={handleCreateMaterial} className="space-y-4">
-                                    <div>
+                                    <div className="space-y-2">
                                         <Label htmlFor="materialName">Name *</Label>
                                         <Input
                                             id="materialName"
@@ -334,7 +334,7 @@ export default function SupplierAdmin() {
                                             required
                                         />
                                     </div>
-                                    <div>
+                                    <div className="space-y-2">
                                         <Label htmlFor="materialDescription">Description</Label>
                                         <Textarea
                                             id="materialDescription"
@@ -344,7 +344,7 @@ export default function SupplierAdmin() {
                                         />
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
-                                        <div>
+                                        <div className="space-y-2">
                                             <Label htmlFor="materialUnit">Unit of Measure</Label>
                                             <Select
                                                 value={materialForm.unitOfMeasure}
@@ -362,7 +362,7 @@ export default function SupplierAdmin() {
                                                 </SelectContent>
                                             </Select>
                                         </div>
-                                        <div>
+                                        <div className="space-y-2">
                                             <Label htmlFor="materialStock">Current Stock</Label>
                                             <Input
                                                 id="materialStock"
@@ -372,7 +372,7 @@ export default function SupplierAdmin() {
                                             />
                                         </div>
                                     </div>
-                                    <div>
+                                    <div className="space-y-2">
                                         <Label htmlFor="materialPrice">Price per Unit ($)</Label>
                                         <Input
                                             id="materialPrice"
@@ -468,7 +468,7 @@ export default function SupplierAdmin() {
                                     </DialogDescription>
                                 </DialogHeader>
                                 <form onSubmit={handleCreateEquipment} className="space-y-4">
-                                    <div>
+                                    <div className="space-y-2">
                                         <Label htmlFor="equipmentName">Name *</Label>
                                         <Input
                                             id="equipmentName"
@@ -477,7 +477,7 @@ export default function SupplierAdmin() {
                                             required
                                         />
                                     </div>
-                                    <div>
+                                    <div className="space-y-2">
                                         <Label htmlFor="equipmentDescription">Description</Label>
                                         <Textarea
                                             id="equipmentDescription"
@@ -487,7 +487,7 @@ export default function SupplierAdmin() {
                                         />
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
-                                        <div>
+                                        <div className="space-y-2">
                                             <Label htmlFor="equipmentType">Type</Label>
                                             <Select
                                                 value={equipmentForm.equipmentType}
@@ -505,7 +505,7 @@ export default function SupplierAdmin() {
                                                 </SelectContent>
                                             </Select>
                                         </div>
-                                        <div>
+                                        <div className="space-y-2">
                                             <Label htmlFor="equipmentModel">Model</Label>
                                             <Input
                                                 id="equipmentModel"
@@ -514,7 +514,7 @@ export default function SupplierAdmin() {
                                             />
                                         </div>
                                     </div>
-                                    <div>
+                                    <div className="space-y-2">
                                         <Label htmlFor="equipmentPrice">Price ($)</Label>
                                         <Input
                                             id="equipmentPrice"
@@ -597,7 +597,7 @@ export default function SupplierAdmin() {
                         </DialogDescription>
                     </DialogHeader>
                     <form onSubmit={handleUpdateMaterial} className="space-y-4">
-                        <div>
+                        <div className="space-y-2">
                             <Label htmlFor="editMaterialName">Name *</Label>
                             <Input
                                 id="editMaterialName"
@@ -606,7 +606,7 @@ export default function SupplierAdmin() {
                                 required
                             />
                         </div>
-                        <div>
+                        <div className="space-y-2">
                             <Label htmlFor="editMaterialDescription">Description</Label>
                             <Textarea
                                 id="editMaterialDescription"
@@ -616,7 +616,7 @@ export default function SupplierAdmin() {
                             />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
-                            <div>
+                            <div className="space-y-2">
                                 <Label htmlFor="editMaterialUnit">Unit of Measure</Label>
                                 <Select
                                     value={materialForm.unitOfMeasure}
@@ -634,7 +634,7 @@ export default function SupplierAdmin() {
                                     </SelectContent>
                                 </Select>
                             </div>
-                            <div>
+                            <div className="space-y-2">
                                 <Label htmlFor="editMaterialStock">Current Stock</Label>
                                 <Input
                                     id="editMaterialStock"
@@ -644,7 +644,7 @@ export default function SupplierAdmin() {
                                 />
                             </div>
                         </div>
-                        <div>
+                        <div className="space-y-2">
                             <Label htmlFor="editMaterialPrice">Price per Unit ($)</Label>
                             <Input
                                 id="editMaterialPrice"
@@ -674,7 +674,7 @@ export default function SupplierAdmin() {
                         </DialogDescription>
                     </DialogHeader>
                     <form onSubmit={handleUpdateEquipment} className="space-y-4">
-                        <div>
+                        <div className="space-y-2">
                             <Label htmlFor="editEquipmentName">Name *</Label>
                             <Input
                                 id="editEquipmentName"
@@ -683,7 +683,7 @@ export default function SupplierAdmin() {
                                 required
                             />
                         </div>
-                        <div>
+                        <div className="space-y-2">
                             <Label htmlFor="editEquipmentDescription">Description</Label>
                             <Textarea
                                 id="editEquipmentDescription"
@@ -693,7 +693,7 @@ export default function SupplierAdmin() {
                             />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
-                            <div>
+                            <div className="space-y-2">
                                 <Label htmlFor="editEquipmentType">Type</Label>
                                 <Select
                                     value={equipmentForm.equipmentType}
@@ -711,7 +711,7 @@ export default function SupplierAdmin() {
                                     </SelectContent>
                                 </Select>
                             </div>
-                            <div>
+                            <div className="space-y-2">
                                 <Label htmlFor="editEquipmentModel">Model</Label>
                                 <Input
                                     id="editEquipmentModel"
@@ -720,7 +720,7 @@ export default function SupplierAdmin() {
                                 />
                             </div>
                         </div>
-                        <div>
+                        <div className="space-y-2">
                             <Label htmlFor="editEquipmentPrice">Price ($)</Label>
                             <Input
                                 id="editEquipmentPrice"

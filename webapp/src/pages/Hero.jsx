@@ -15,10 +15,10 @@ export default function Hero() {
             <p className="mt-3 text-base md:text-lg text-muted-foreground">Centralize your construction projects, suppliers, materials, tasks, and finance in one simple workspace.</p>
             <div className="mt-5 flex flex-col sm:flex-row gap-3">
               <Link to="/suppliers">
-                <Button className="h-11 w-full sm:w-auto rounded-none shadow-none bg-neutral-900 text-neutral-50 border-0 hover:bg-neutral-800 transition-colors duration-200 ease">Stakeholder Management</Button>
+                <Button className="h-11 w-full sm:w-auto rounded-none shadow-none bg-neutral-900 hover:cursor-pointer text-neutral-50 border-0 hover:bg-neutral-800 transition-colors duration-200 ease">Stakeholder Management</Button>
               </Link>
               <Link to="/construction">
-                <Button className="h-11 w-full sm:w-auto rounded-none shadow-none bg-neutral-900 text-neutral-50 border-0 hover:bg-neutral-800 transition-colors duration-200 ease">Construction Management</Button>
+                <Button className="h-11 w-full sm:w-auto rounded-none shadow-none bg-neutral-900 hover:cursor-pointer text-neutral-50 border-0 hover:bg-neutral-800 transition-colors duration-200 ease">Construction Management</Button>
               </Link>
             </div>
           </div>

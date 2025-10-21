@@ -21,10 +21,8 @@ public class EquipmentProcessingStrategy implements ResourceProcessingStrategy {
             throw new IllegalArgumentException("Equipment not found with id: " + resourceId);
         }
         
-        // Equipment doesn't need stock validation like materials
-        validateStock(quantity, 1); // Equipment is typically 1 unit
+        validateStock(quantity, 1); 
         
-        // Create company stock entry
         CompanyStock stock = new CompanyStock();
         stock.setStatus("ACTIVE");
         stock.setResourceType("EQUIPMENT");
@@ -35,15 +33,12 @@ public class EquipmentProcessingStrategy implements ResourceProcessingStrategy {
         stock.setUnitCost(unitCost != null ? unitCost : equipment.getPrice());
         stock.setTotalValue(stock.getUnitCost().multiply(BigDecimal.valueOf(quantity)));
         
-        // Equipment doesn't reduce supplier stock like materials
-        // Equipment is typically purchased/rented, not consumed
         
         return stock;
     }
     
     @Override
     public void validateStock(Integer requiredQuantity, Integer availableQuantity) {
-        // Equipment validation is different - typically just check if equipment exists
         if (requiredQuantity <= 0) {
             throw new IllegalArgumentException("Invalid quantity for equipment: " + requiredQuantity);
         }

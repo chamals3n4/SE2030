@@ -186,10 +186,10 @@ export default function CreateProject() {
     }
 
     return (
-        <div className="min-h-screen flex flex-col justify-center py-10 sm:px-6 lg:px-8">
-            <div className="sm:mx-auto sm:w-full sm:max-w-2xl">
-                <div className="text-center">
-                    <h2 className="text-3xl font-bold text-gray-900">
+        <div className="min-h-screen py-4 px-4 sm:py-8 sm:px-6 lg:px-8">
+            <div className="mx-auto w-full max-w-2xl">
+                <div>
+                    <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
                         Create New Project
                     </h2>
                     <p className="mt-2 text-sm text-gray-600">
@@ -199,14 +199,14 @@ export default function CreateProject() {
             </div>
 
             {/* stepper */}
-            <div className="sm:mx-auto sm:w-full sm:max-w-2xl mt-6">
+            <div className="mx-auto w-full max-w-2xl mt-4 sm:mt-6">
                 <div className="grid grid-cols-2 gap-2">
                     <div className={`h-2 rounded-full ${currentStep === 1 ? 'bg-red-500' : 'bg-red-200'}`}></div>
                     <div className={`h-2 rounded-full ${currentStep === 2 ? 'bg-red-500' : 'bg-red-200'}`}></div>
                 </div>
             </div>
 
-            <div className="mt-6 sm:mx-auto sm:w-full sm:max-w-2xl">
+            <div className="mt-4 sm:mt-6 mx-auto w-full max-w-2xl">
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
@@ -252,7 +252,7 @@ export default function CreateProject() {
                                         name="name"
                                         rules={{ required: "Client name is required" }}
                                         render={({ field }) => (
-                                            <FormItem>
+                                            <FormItem className="space-y-2">
                                                 <FormLabel>Client Name</FormLabel>
                                                 <FormControl>
                                                     <div className="relative">
@@ -281,7 +281,7 @@ export default function CreateProject() {
                                             }
                                         }}
                                         render={({ field }) => (
-                                            <FormItem>
+                                            <FormItem className="space-y-2">
                                                 <FormLabel>Email Address</FormLabel>
                                                 <FormControl>
                                                     <div className="relative">
@@ -305,7 +305,7 @@ export default function CreateProject() {
                                         name="phone"
                                         rules={{ required: "Phone number is required" }}
                                         render={({ field }) => (
-                                            <FormItem>
+                                            <FormItem className="space-y-2">
                                                 <FormLabel>Phone Number</FormLabel>
                                                 <FormControl>
                                                     <div className="relative">
@@ -361,7 +361,7 @@ export default function CreateProject() {
                                         name="name"
                                         rules={{ required: "Project name is required" }}
                                         render={({ field }) => (
-                                            <FormItem>
+                                            <FormItem className="space-y-2">
                                                 <FormLabel>Project Name</FormLabel>
                                                 <FormControl>
                                                     <div className="relative">
@@ -386,7 +386,7 @@ export default function CreateProject() {
                                         control={projectForm.control}
                                         name="description"
                                         render={({ field }) => (
-                                            <FormItem>
+                                            <FormItem className="space-y-2">
                                                 <FormLabel>Description</FormLabel>
                                                 <FormControl>
                                                     <Textarea
@@ -408,7 +408,7 @@ export default function CreateProject() {
                                         control={projectForm.control}
                                         name="location"
                                         render={({ field }) => (
-                                            <FormItem>
+                                            <FormItem className="space-y-2">
                                                 <FormLabel>Location</FormLabel>
                                                 <FormControl>
                                                     <div className="relative">
@@ -440,7 +440,7 @@ export default function CreateProject() {
                                             }
                                         }}
                                         render={({ field }) => (
-                                            <FormItem>
+                                            <FormItem className="space-y-2">
                                                 <FormLabel>Budget ($)</FormLabel>
                                                 <FormControl>
                                                     <div className="relative">
@@ -467,7 +467,7 @@ export default function CreateProject() {
                                             control={projectForm.control}
                                             name="startDate"
                                             render={({ field }) => (
-                                                <FormItem>
+                                                <FormItem className="space-y-2">
                                                     <FormLabel>Start Date</FormLabel>
                                                     <FormControl>
                                                         <Popover>
@@ -499,7 +499,7 @@ export default function CreateProject() {
                                             control={projectForm.control}
                                             name="endDate"
                                             render={({ field }) => (
-                                                <FormItem>
+                                                <FormItem className="space-y-2">
                                                     <FormLabel>End Date</FormLabel>
                                                     <FormControl>
                                                         <Popover>
@@ -528,7 +528,7 @@ export default function CreateProject() {
                                         />
                                     </div>
 
-                                    <div>
+                                    <div className="space-y-2">
                                         <Label>Priority</Label>
                                         <Select value={projectForm.getValues("priority")} onValueChange={(value) => projectForm.setValue("priority", value)}>
                                             <SelectTrigger>

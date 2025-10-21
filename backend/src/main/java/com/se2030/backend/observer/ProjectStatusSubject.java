@@ -18,7 +18,6 @@ public class ProjectStatusSubject {
     
     @PostConstruct
     public void init() {
-        // Register the client SMS observer
         addObserver(clientSMSObserver);
         System.out.println("Project Status Subject initialized with " + observers.size() + " observers");
     }
@@ -43,7 +42,6 @@ public class ProjectStatusSubject {
                 observer.onProjectStatusChanged(project, oldStatus, newStatus);
             } catch (Exception e) {
                 System.err.println("Error notifying observer " + observer.getObserverType() + ": " + e.getMessage());
-                // Continue with other observers even if one fails
             }
         }
     }
