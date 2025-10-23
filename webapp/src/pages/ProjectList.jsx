@@ -236,7 +236,7 @@ export default function ProjectList() {
             <div className="flex-shrink-0">
               <Button
                 size="lg"
-                className="w-full sm:w-auto bg-red-500 hover:bg-red-600 text-white"
+                className="w-full sm:w-auto bg-red-500 hover:bg-red-600 hover:cursor-pointer text-white"
                 onClick={() => navigate("/projects/create")}
               >
                 <Plus className="h-5 w-5 mr-2" />
@@ -317,13 +317,11 @@ export default function ProjectList() {
                 No projects yet
               </h3>
               <p className="text-gray-500 text-center mb-8 max-w-md leading-relaxed">
-                Get started by creating your first construction project. Add
-                client details and project information to begin managing your
-                work.
+                Get started by creating your first construction project.
               </p>
               <Button
                 onClick={() => navigate("/projects/create")}
-                className="flex items-center gap-2 text-white bg-blue-600 hover:bg-blue-700 px-6 py-3"
+                className="flex items-center gap-2 text-white hover:cursor-pointer bg-blue-600 hover:bg-blue-700 px-6 py-3"
               >
                 <Plus className="h-4 w-4" />
                 Create First Project
@@ -354,12 +352,12 @@ export default function ProjectList() {
                         <span className="font-medium">Client:</span> {project.client.name}
                       </p>
                     )}
-                    
+
                     <div className="flex items-center text-sm text-gray-600">
                       <MapPin className="h-4 w-4 mr-2 text-gray-400 flex-shrink-0" />
                       <span className="truncate">{project.location || "No location"}</span>
                     </div>
-                    
+
                     {project.budget && (
                       <div className="flex items-center text-sm text-gray-600">
                         <svg className="h-4 w-4 mr-2 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -587,7 +585,7 @@ export default function ProjectList() {
                 >
                   Cancel
                 </Button>
-                <Button type="submit" className="bg-blue-500 hover:bg-blue-600">
+                <Button type="submit" className="bg-blue-500 hover:cursor-pointer hover:bg-blue-600">
                   Update Project
                 </Button>
               </DialogFooter>

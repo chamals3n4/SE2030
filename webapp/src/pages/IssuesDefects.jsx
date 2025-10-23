@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { issueAPI, projectAPI, employeeAPI } from '../services/api';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -17,6 +18,8 @@ const ISSUE_STATUSES = ['OPEN', 'IN_PROGRESS', 'RESOLVED', 'CLOSED'];
 const ISSUE_SEVERITIES = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
 
 export default function IssuesDefects() {
+    const { projectId } = useParams();
+    const [currentProject, setCurrentProject] = useState(null);
     const [issues, setIssues] = useState([]);
     const [projects, setProjects] = useState([]);
     const [employees, setEmployees] = useState([]);
@@ -59,8 +62,15 @@ export default function IssuesDefects() {
     const fetchInitialData = async () => {
         try {
             setLoading(true);
+
+            // Fetch current project if projectId exists
+            if (projectId) {
+                const projectRes = await projectAPI.getById(projectId);
+                setCurrentProject(projectRes.data);
+            }
+
             const [issuesRes, projectsRes, employeesRes] = await Promise.all([
-                issueAPI.getAll(),
+                projectId ? issueAPI.getByProject(projectId) : issueAPI.getAll(),
                 projectAPI.getAll(),
                 employeeAPI.getAll()
             ]);
@@ -112,7 +122,10 @@ export default function IssuesDefects() {
     const handleCreateIssue = async (e) => {
         e.preventDefault();
         try {
-            if (formData.project) {
+            // Use projectId from URL route params
+            if (projectId) {
+                await issueAPI.createForProject(projectId, formData);
+            } else if (formData.project) {
                 await issueAPI.createForProject(formData.project.projectId, formData);
             } else {
                 await issueAPI.create(formData);
@@ -198,7 +211,7 @@ export default function IssuesDefects() {
             reportedDate: new Date().toISOString().split('T')[0],
             resolvedDate: '',
             attachmentUrl: '',
-            project: null
+            project: currentProject // Auto-set the current project
         });
     };
 
@@ -247,7 +260,7 @@ export default function IssuesDefects() {
                         </DialogHeader>
                         <form onSubmit={handleCreateIssue} className="space-y-4">
                             <div>
-                                <Label htmlFor="title">Title</Label>
+                                <Label htmlFor="title" className="mb-2 block">Title</Label>
                                 <Input
                                     id="title"
                                     value={formData.title}
@@ -256,7 +269,7 @@ export default function IssuesDefects() {
                                 />
                             </div>
                             <div>
-                                <Label htmlFor="description">Description</Label>
+                                <Label htmlFor="description" className="mb-2 block">Description</Label>
                                 <Textarea
                                     id="description"
                                     value={formData.description}
@@ -266,7 +279,7 @@ export default function IssuesDefects() {
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <Label htmlFor="severity">Severity</Label>
+                                    <Label htmlFor="severity" className="mb-2 block">Severity</Label>
                                     <Select value={formData.severity} onValueChange={(value) => setFormData({ ...formData, severity: value })}>
                                         <SelectTrigger>
                                             <SelectValue />
@@ -279,7 +292,7 @@ export default function IssuesDefects() {
                                     </Select>
                                 </div>
                                 <div>
-                                    <Label htmlFor="status">Status</Label>
+                                    <Label htmlFor="status" className="mb-2 block">Status</Label>
                                     <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
                                         <SelectTrigger>
                                             <SelectValue />
@@ -293,30 +306,12 @@ export default function IssuesDefects() {
                                 </div>
                             </div>
                             <div>
-                                <Label htmlFor="project">Project</Label>
-                                <Select value={formData.project?.projectId || ''} onValueChange={(value) => {
-                                    const project = projects.find(p => p.projectId === parseInt(value));
-                                    setFormData({ ...formData, project });
-                                }}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select project" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {projects.map(project => (
-                                            <SelectItem key={project.projectId} value={project.projectId.toString()}>
-                                                {project.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <div>
-                                <Label htmlFor="attachmentUrl">Attachment URL</Label>
+                                <Label htmlFor="attachmentUrl" className="mb-2 block">Attachment URL (Optional)</Label>
                                 <Input
                                     id="attachmentUrl"
                                     value={formData.attachmentUrl}
                                     onChange={(e) => setFormData({ ...formData, attachmentUrl: e.target.value })}
-                                    placeholder="Optional: URL to screenshot or document"
+                                    placeholder="URL to screenshot or document"
                                 />
                             </div>
                             <div className="flex justify-end space-x-2">
@@ -451,7 +446,7 @@ export default function IssuesDefects() {
                     </DialogHeader>
                     <form onSubmit={handleUpdateIssue} className="space-y-4">
                         <div>
-                            <Label htmlFor="editTitle">Title</Label>
+                            <Label htmlFor="editTitle" className="mb-2 block">Title</Label>
                             <Input
                                 id="editTitle"
                                 value={formData.title}
@@ -460,7 +455,7 @@ export default function IssuesDefects() {
                             />
                         </div>
                         <div>
-                            <Label htmlFor="editDescription">Description</Label>
+                            <Label htmlFor="editDescription" className="mb-2 block">Description</Label>
                             <Textarea
                                 id="editDescription"
                                 value={formData.description}
@@ -470,7 +465,7 @@ export default function IssuesDefects() {
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <Label htmlFor="editSeverity">Severity</Label>
+                                <Label htmlFor="editSeverity" className="mb-2 block">Severity</Label>
                                 <Select value={formData.severity} onValueChange={(value) => setFormData({ ...formData, severity: value })}>
                                     <SelectTrigger>
                                         <SelectValue />
@@ -483,7 +478,7 @@ export default function IssuesDefects() {
                                 </Select>
                             </div>
                             <div>
-                                <Label htmlFor="editStatus">Status</Label>
+                                <Label htmlFor="editStatus" className="mb-2 block">Status</Label>
                                 <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
                                     <SelectTrigger>
                                         <SelectValue />
@@ -497,12 +492,12 @@ export default function IssuesDefects() {
                             </div>
                         </div>
                         <div>
-                            <Label htmlFor="editAttachmentUrl">Attachment URL</Label>
+                            <Label htmlFor="editAttachmentUrl" className="mb-2 block">Attachment URL (Optional)</Label>
                             <Input
                                 id="editAttachmentUrl"
                                 value={formData.attachmentUrl}
                                 onChange={(e) => setFormData({ ...formData, attachmentUrl: e.target.value })}
-                                placeholder="Optional: URL to screenshot or document"
+                                placeholder="URL to screenshot or document"
                             />
                         </div>
                         <div className="flex justify-end space-x-2">
@@ -522,7 +517,7 @@ export default function IssuesDefects() {
                     </DialogHeader>
                     <form onSubmit={handleAssignIssue} className="space-y-4">
                         <div>
-                            <Label htmlFor="assignEmployee">Assign To</Label>
+                            <Label htmlFor="assignEmployee" className="mb-2 block">Assign To</Label>
                             <Select value={assignData.employeeId} onValueChange={(value) => setAssignData({ ...assignData, employeeId: value })}>
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select employee" />

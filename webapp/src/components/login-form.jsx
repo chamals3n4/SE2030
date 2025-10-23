@@ -10,7 +10,7 @@ export function LoginForm({ onSignIn }) {
 
             <div className="mt-3">
                 <Button
-                    className="h-11 w-full rounded-none shadow-none bg-neutral-900 hover:cursor-pointer text-neutral-50 border-0 hover:bg-neutral-800 transition-colors duration-200 ease"
+                    className="h-11 w-full rounded-none shadow-none bg-neutral-900 hover:cursor-pointer text-neutral-50 border-0 hover:bg-orange-600 transition-colors duration-200 ease"
                     onClick={() => onSignIn()}
                 >
                     Sign in with Asgardeo

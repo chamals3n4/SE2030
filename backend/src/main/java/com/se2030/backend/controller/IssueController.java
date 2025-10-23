@@ -28,7 +28,7 @@ public class IssueController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<Issue> createForProject(@RequestParam("projectId") Long projectId, @Valid @RequestBody Issue issue) {
+    public ResponseEntity<Issue> createForProject(@RequestParam("projectId") Long projectId, @RequestBody Issue issue) {
         com.se2030.backend.model.Project ref = new com.se2030.backend.model.Project();
         ref.setProjectId(projectId);
         issue.setProject(ref);
