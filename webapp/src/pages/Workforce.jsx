@@ -209,6 +209,7 @@ export default function Workforce() {
         });
     };
 
+    //Colors of the status tabs
     const getStatusBadgeVariant = (status) => {
         switch (status) {
             case 'ACTIVE': return 'default';
